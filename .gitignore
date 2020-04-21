@@ -1,3 +1,6 @@
 *.pyc
 *.html
 docs/build
+dist/
+build/
+koma_KAK.egg-info

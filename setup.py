@@ -1,11 +1,11 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="fet-KAK", # Replace with your own username
-    version="0.0.1",
+    name="koma-KAK", # Replace with your own username
+    version="0.1",
     author="Knut Andreas Kvåle",
     author_email="knut.a.kvale@gmail.com",
     description="Knut's Operational Modal Analysis Toolbox for Python. Matlab version available under './+koma/'.",
