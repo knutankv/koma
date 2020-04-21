@@ -79,4 +79,4 @@ Jos van der Geest contribution to Mathworks Central File Exchange is used to pro
 
 References
 =======================
-[1] Knut Andreas Kvåle, Ole Øiseth, and Anders Rønnquist. Operational modal analysis of an end-supported pontoon bridge. Engineering Structures, 148:410–423, oct 2017. URL: <http://www.sciencedirect.com/science/article/pii/S0141029616307805>, doi:10.1016/j.engstruct.2017.06.069.
+[1] Knut Andreas Kvåle, Ole Øiseth, and Anders Rønnquist. Operational modal analysis of an end-supported pontoon bridge. Engineering Structures, 148:410–423, oct 2017. URL: http://www.sciencedirect.com/science/article/pii/S0141029616307805, doi:10.1016/j.engstruct.2017.06.069.
