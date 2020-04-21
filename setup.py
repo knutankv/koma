@@ -4,7 +4,7 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="koma-KAK", # Replace with your own username
+    name="koma-knutankv",
     version="0.1",
     author="Knut Andreas Kvåle",
     author_email="knut.a.kvale@gmail.com",

@@ -1,5 +1,6 @@
 *.pyc
 *.html
+*.bat
 docs/build
 dist/
 build/
