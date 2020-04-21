@@ -56,7 +56,7 @@ Now all the subroutines of the package are accessible through
 
     koma.function_name
 
-E.g., to use the function :file:`covssi.m` located at .../+koma/+oma/ the following syntax is applied:
+E.g., to use the function `covssi.m` located at .../+koma/+oma/ the following syntax is applied:
 
 .. code-block:: matlab
 
