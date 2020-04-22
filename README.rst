@@ -3,7 +3,7 @@
 KOMA
 =======================
 
-KOMA is a package for operational modal analysis, with core functionality available both in Python and MATLAB languages. For additional details about the implementation of the covariance-driven stochastic subspace identification algorithm please refer to [1]. Data-SSI and FDD are implemented in the MATLAB version of KOMA. For automatic OMA and clustering analysis, please refer to [7]. More information and functionality will be added after publication of the cited paper. 
+KOMA is a package for operational modal analysis, with core functionality available both in Python and MATLAB languages. For additional details about the implementation of the covariance-driven stochastic subspace identification algorithm please refer to [1]. Data-SSI and FDD are implemented in the MATLAB version of KOMA. For automatic OMA and clustering analysis, please refer to [2]. More information and functionality will be added after publication of the cited paper. 
 
 Please refer to the `documentation <https://folk.ntnu.no/knutankv/koma>`_ for more details.
 
@@ -80,3 +80,4 @@ Jos van der Geest contribution to Mathworks Central File Exchange is used to pro
 References
 =======================
 [1] Knut Andreas Kvåle, Ole Øiseth, and Anders Rønnquist. Operational modal analysis of an end-supported pontoon bridge. Engineering Structures, 148:410–423, oct 2017. URL: http://www.sciencedirect.com/science/article/pii/S0141029616307805, doi:10.1016/j.engstruct.2017.06.069.
+[2] K.A. Kvåle and Ole Øiseth. Automated operational modal analysis of an end-supported pontoon bridge using covariance-driven stochastic subspace identification and a density-based hierarchical clustering algorithm. IABMAS Conference, 2020.
