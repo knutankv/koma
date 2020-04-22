@@ -23,7 +23,7 @@ xlabel('Time [s]')
 
 %% Noise plot, mid-level
 figure(100),clf
-noise = 1*mean(std(data_clean));
+noise = 0*mean(std(data_clean));
 data = data_clean + noise*randn(size(data_clean));
 
 plot(t, data(:,2))
@@ -62,3 +62,7 @@ data_3d(:,2:3:end) = 0*data_rs;
 
 [lambda,phi,order] = koma.oma.covssi(data_3d, fs_rs, i, 'order',order);
 koma.vis.stabplot(lambda,phi,order,'plot','stable','indicator','freq','stablevel',4,'selection',true,'grid',griddef,'slave',slave,'elements',elements,'active_nodes',active_nodes)
+
+
+%% EXPORT TO CSV
+csvwrite('response_data.csv', data_3d) 

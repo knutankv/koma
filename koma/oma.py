@@ -10,7 +10,7 @@ import numpy as np
 from numpy.linalg import solve
 from scipy.signal import correlate
 from scipy.linalg import matrix_balance, cholesky
-from .modal import xmacmat_alt as mac_numbers
+from .modal import xmacmat_alt
 
 def is_pos_def(x):
     """
@@ -486,7 +486,7 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
                 phi_last = phi[order_ix-level]
     
                 if indicator is 'mac':
-                    macs = mac_numbers(phi_last, phi_this[:, pole_ix], check_conjugates=True)
+                    macs = xmacmat_alt(phi_last, phi_this[:, pole_ix], conjugates=True)
                     pole_ix_last = np.argmax(macs[:,0])   #find largest mac in first column (all in matrix compared with vector)
                 elif indicator is 'freq':
                     omega_last = abs(lambd[order_ix-level])
@@ -497,7 +497,7 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
                 omega_last = abs(lambd_last)
                 dxi = abs(xi[pole_ix] - xi_last)
                 dw = abs(omega[pole_ix] - omega_last)
-                mac = mac_numbers(phi_last[:, pole_ix_last], phi_this[:, pole_ix], check_conjugates=True)
+                mac = xmacmat_alt(phi_last[:, pole_ix_last], phi_this[:, pole_ix], conjugates=True)
     
                 if ((dw/omega_last)<=wtol) and ((dxi/xi_last)<=xitol) and (mac>=(1-mactol)) and (valid_range['freq'][0]<omega_last<valid_range['freq'][1]) and (valid_range['damping'][0]<xi_last<valid_range['damping'][1]):
                     stab += 1
