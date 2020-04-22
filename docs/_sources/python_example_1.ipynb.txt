@@ -4,16 +4,16 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Python example"
+    "# Simple Python example: shear frame"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": 1,
    "metadata": {},
    "outputs": [],
    "source": [
-    "import koma, koma.oma\n",
+    "import koma.oma\n",
     "\n",
     "import numpy as np\n",
     "import matplotlib.pyplot as plt\n",
@@ -32,7 +32,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 95,
+   "execution_count": 2,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -62,7 +62,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 96,
+   "execution_count": 3,
    "metadata": {},
    "outputs": [
     {
@@ -102,29 +102,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Preprocess"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 97,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "data_rs = detrend(data_noised, axis=0) # detrend \n",
-    "fs_rs = fs*1.0"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
     "## Cov-SSI call"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 98,
+   "execution_count": 4,
    "metadata": {},
    "outputs": [
     {
@@ -144,7 +127,7 @@
     }
    ],
    "source": [
-    "lambd, phi = koma.oma.covssi(data_rs, fs_rs, i, orders)"
+    "lambd, phi = koma.oma.covssi(data, fs, i, orders)"
    ]
   },
   {
@@ -156,18 +139,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 99,
+   "execution_count": 5,
    "metadata": {},
    "outputs": [],
    "source": [
     "# Establishing stable poles\n",
     "lambd_stab, phi_stab, orders_stab, ix_stab = koma.oma.find_stable_poles(lambd, phi, orders, s, stabcrit=stabcrit, indicator='mac')\n",
-    "omega_d = np.abs(np.imag(lambd_stab))"
+    "omega_d = np.abs(np.imag(lambd_stab))\n"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 100,
+   "execution_count": 6,
    "metadata": {},
    "outputs": [
     {
