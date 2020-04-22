@@ -1,0 +1,604 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Python code reference &mdash; KOMA 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MATLAB code reference" href="code_matlab.html" />
+    <link rel="prev" title="Installation and usage" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> KOMA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Python code reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#operational-modal-analysis-module">Operational modal analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modal-post-processing-module">Modal post-processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clustering-analysis-module">Clustering analysis module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code_matlab.html">MATLAB code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="licensing.html">Licensing information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">KOMA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Python code reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/code_python.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-koma.oma">
+<span id="python-code-reference"></span><h1>Python code reference<a class="headerlink" href="#module-koma.oma" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="operational-modal-analysis-module">
+<h2>Operational modal analysis module<a class="headerlink" href="#operational-modal-analysis-module" title="Permalink to this headline">¶</a></h2>
+<p>All functions related to operational modal analysis.</p>
+<dl class="function">
+<dt id="koma.oma.covssi">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">covssi</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">fs</em>, <em class="sig-param">i</em>, <em class="sig-param">orders</em>, <em class="sig-param">weighting='none'</em>, <em class="sig-param">matrix_type='hankel'</em>, <em class="sig-param">algorithm='shift'</em>, <em class="sig-param">showinfo=True</em>, <em class="sig-param">balance=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#covssi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.covssi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function for covariance-driven SSI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>double</em>) – data matrix, with channels stacked column-wise (n_samples-by-n_channels)</p></li>
+<li><p><strong>fs</strong> (<em>double</em>) – sampling frequency</p></li>
+<li><p><strong>i</strong> (<em>int</em>) – maximum number of block rows</p></li>
+<li><p><strong>orders</strong> (<em>int</em>) – array or list of what orders to include</p></li>
+<li><p><strong>weighting</strong> (<em>'none'</em><em>, </em><em>optional</em>) – what weighting type to use (‘none’ or ‘br’, or ‘cva’)</p></li>
+<li><p><strong>matrix_type</strong> (<em>'matrix_type'</em><em>, </em><em>optional</em>) – what matrix type formulation to base computation on (‘hankel’ or ‘toeplitz’)</p></li>
+<li><p><strong>algorithm</strong> (<em>'shift'</em><em>, </em><em>optional</em>) – what algorithm to use (‘shift’ or ‘standard’ - when using ‘standard’ the method is equivalent to NExt-ERA)</p></li>
+<li><p><strong>showinfo</strong> (<em>True</em><em>, </em><em>optional</em>) – whether or not to print information during computation</p></li>
+<li><p><strong>balance</strong> (<em>True</em><em>, </em><em>optional</em>) – whether or not to conduct balancing to the cross-correlation matrices prior to matrix operations (Cholesky and SVD)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lambd</strong> (<em>double</em>) – list of arrays with complex-valued eigenvalues (each list entry correspond to one order)</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – list of 2d arrays with complex-valued eigenvectors (each list entry correspond to one order), each column corresponds to a mode</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>Hermans and van Der Auweraer <a class="bibtex reference internal" href="references.html#hermans1999" id="id1">[1]</a> (1 in code)</p></li>
+<li><p>Van Overschee and de Moor <a class="bibtex reference internal" href="references.html#vanoverschee1996" id="id2">[2]</a> (2 in code)</p></li>
+<li><p>Rainieri and Fabbrocino <a class="bibtex reference internal" href="references.html#rainieri" id="id3">[3]</a> (3 in code)</p></li>
+<li><p>Pridham and Wilson <a class="bibtex reference internal" href="references.html#pridham2003" id="id4">[4]</a> (4 in code)</p></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.cva_weights">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">cva_weights</code><span class="sig-paren">(</span><em class="sig-param">R</em>, <em class="sig-param">balancing_H0=None</em>, <em class="sig-param">balance=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#cva_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.cva_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the weights for CVA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>R</strong> (<em>double</em>) – n_channels-by-n_channels-by-n_lags large array, each slice in third dimension
+corresponds to the cross-correlation matrix for a given time lag</p></li>
+<li><p><strong>balancing_H0</strong> (<em>boolean</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>balance</strong> (<em>boolean</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>W1</strong> (<em>double</em>) – lower triangular Cholesky factor of R+ (see Hermans and van der Auweraer)</p></li>
+<li><p><strong>W2</strong> (<em>double</em>) – lower triangular Cholesky factor of R- (see Hermans and van der Auweraer)</p></li>
+<li><p><strong>L1</strong> (<em>double</em>) – inverse of W1</p></li>
+<li><p><strong>L2</strong> (<em>double</em>) – inverse of W2</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Hermans and van Der Auweraer <a class="bibtex reference internal" href="references.html#hermans1999" id="id5">[1]</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.find_stable_poles">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">find_stable_poles</code><span class="sig-paren">(</span><em class="sig-param">lambd, phi, orders, s, stabcrit={'damping': 0.1, 'freq': 0.05, 'mac': 0.1}, valid_range={'damping': [0, inf], 'freq': [0, inf]}, indicator='freq'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#find_stable_poles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.find_stable_poles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambd</strong> (<em>double</em>) – list of arrays with complex-valued eigenvalues, one list entry per order</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – list of 2d arrays with complex-valued eigevectors (stacked column-wise), one list entry per order</p></li>
+<li><p><strong>orders</strong> (<em>int</em>) – orders corresponding to the list entries in lambd and phi</p></li>
+<li><p><strong>s</strong> (<em>int</em>) – stability level, see <a class="bibtex reference internal" href="references.html#kvale2017-oma" id="id6">[5]</a></p></li>
+<li><p><strong>stabcrit</strong> (<em>{'freq': 0.05</em><em>, </em><em>'damping':0.1</em><em>, </em><em>'mac': 0.1}</em><em>, </em><em>optional</em>) – criteria to be fulfilled for pole to be deemed stable</p></li>
+<li><p><strong>valid_range</strong> (<em>{'freq':</em><em> [</em><em>0</em><em>, </em><em>np.inf</em><em>]</em><em>, </em><em>'damping':</em><em>[</em><em>0</em><em>, </em><em>np.inf</em><em>]</em><em>}</em><em>, </em><em>optional</em>) – valid ranges of frequencies (rad/s) and damping for pole to be deemed stable</p></li>
+<li><p><strong>indicator</strong> (<em>'freq'</em><em>, </em><em>optional</em>) – what modal indicator to use (‘freq’ or ‘mac’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lambd_stab</strong> (<em>double</em>) – array with complex-valued eigenvalues deemed stable</p></li>
+<li><p><strong>phi_stab</strong> (<em>double</em>) – 2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a mode</p></li>
+<li><p><strong>order_stab</strong> (<em>int</em>) – corresponding order for each stable mode</p></li>
+<li><p><strong>idx_stab</strong> (<em>int</em>) – indices of poles (within its order from the input) given in lambd_stab deemed stable (for indexing post)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Kvåle et al. <a class="bibtex reference internal" href="references.html#kvale2017-oma" id="id7">[5]</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.gaxpy_chol">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">gaxpy_chol</code><span class="sig-paren">(</span><em class="sig-param">M</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#gaxpy_chol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.gaxpy_chol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gaxpy Cholesky decomposition. Required for Cov-SSI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>M</strong> (<em>double</em>) – matrix to be decomposed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>G</strong> – lower-triangular Cholesky factor of M</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>double</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Conducts the decomposition:</p>
+<div class="math notranslate nohighlight">
+\[[M] = [G][G]^T\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.gaxpy_chol_alt">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">gaxpy_chol_alt</code><span class="sig-paren">(</span><em class="sig-param">M</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#gaxpy_chol_alt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.gaxpy_chol_alt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative Gaxpy Cholesky decomposition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>M</strong> (<em>double</em>) – matrix to be decomposed</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>G</strong> – lower-triangular Cholesky factor of M</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>double</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Conducts the decomposition:</p>
+<div class="math notranslate nohighlight">
+\[[M] = [G][G]^T\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.is_pos_def">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">is_pos_def</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#is_pos_def"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.is_pos_def" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if matrix is positive definite.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>double</em>) – matrix to be checked</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>pos_def</strong> – positive definiteness of matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.stack_hankel">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">stack_hankel</code><span class="sig-paren">(</span><em class="sig-param">R</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#stack_hankel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.stack_hankel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stacks lag-shifted cross-correlation matrices (stacked along third dimension) into Hankel matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>R</strong> (<em>double</em>) – n_channels-by-n_channels-by-n_lags large array, each slice in third dimension
+corresponds to the cross-correlation matrix for a given time lag</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>H0</strong> (<em>double</em>) – block-Hankel matrix</p></li>
+<li><p><strong>H1</strong> (<em>double</em>) – one-lag shifted block-Hankel matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Hermans and van Der Auweraer <a class="bibtex reference internal" href="references.html#hermans1999" id="id8">[1]</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.stack_toeplitz">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">stack_toeplitz</code><span class="sig-paren">(</span><em class="sig-param">R</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#stack_toeplitz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.stack_toeplitz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stacks lag-shifted cross-correlation matrices (stacked along third dimension) into Toeplitz matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>R</strong> (<em>double</em>) – n_channels-by-n_channels-by-n_lags large array, each slice in third dimension
+corresponds to the cross-correlation matrix for a given time lag</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>H0</strong> (<em>double</em>) – block-Toeplitz matrix</p></li>
+<li><p><strong>H1</strong> (<em>double</em>) – one-lag shifted block-Toeplitz matrix</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Rainieri and Fabbrocino <a class="bibtex reference internal" href="references.html#rainieri" id="id9">[3]</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.oma.xcorr_lag">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">xcorr_lag</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">maxlag</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/oma.html#xcorr_lag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.oma.xcorr_lag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes cross-correlation matrices for multiple time lags based on input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>double</em>) – matrix with data, n_samples-by-n_channels (channels are column-wise)</p></li>
+<li><p><strong>maxlag</strong> (<em>int</em>) – maximum number of sample lags</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>R</strong> – n_channels-by-n_channels-by-n_lags large array, each slice in third dimension
+corresponds to the cross-correlation matrix for a given time lag</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>double</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<span class="target" id="module-koma.modal"></span><div class="section" id="modal-post-processing-module">
+<h2>Modal post-processing module<a class="headerlink" href="#modal-post-processing-module" title="Permalink to this headline">¶</a></h2>
+<p>All functions related to the processing of results from OMA methods or in general.</p>
+<dl class="function">
+<dt id="koma.modal.align_modes">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">align_modes</code><span class="sig-paren">(</span><em class="sig-param">phi</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/modal.html#align_modes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.modal.align_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flip complex-valued or real-valued mode shapes such that similar modes have the same sign.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>phi</strong> (<em>double</em>) – complex-valued (or real-valued) modal transformation matrix (column-wise stacked mode shapes)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>phi_aligned</strong> – aligned complex-valued (or real-valued) modal transformation matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.modal.mac">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">mac</code><span class="sig-paren">(</span><em class="sig-param">phi1</em>, <em class="sig-param">phi2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/modal.html#mac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.modal.mac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modal assurance criterion number from comparison of two mode shapes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phi1</strong> (<em>double</em>) – first mode</p></li>
+<li><p><strong>phi2</strong> (<em>double</em>) – second mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>mac_value</strong> – MAC number</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.modal.maxreal">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">maxreal</code><span class="sig-paren">(</span><em class="sig-param">phi</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/modal.html#maxreal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.modal.maxreal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate complex vectors (stacked column-wise) such that the absolute values of the real parts are maximized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>phi</strong> (<em>double</em>) – complex-valued modal transformation matrix (column-wise stacked mode shapes)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>phi_max_real</strong> – complex-valued modal transformation matrix, with vectors rotated to have maximum real parts</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.modal.normalize_phi">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">normalize_phi</code><span class="sig-paren">(</span><em class="sig-param">phi</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/modal.html#normalize_phi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.modal.normalize_phi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize all complex-valued (or real-valued) mode shapes in modal transformation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>phi</strong> (<em>double</em>) – complex-valued (or real-valued) modal transformation matrix (column-wise stacked mode shapes)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>phi_n</strong> (<em>boolean</em>) – modal transformation matrix, with normalized (absolute value of) mode shapes</p></li>
+<li><p><em>mode_scaling</em> – the corresponding scaling factors used to normalize, i.e., phi_n[:,n] * mode_scaling[n] = phi[n]</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.modal.xmacmat">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">xmacmat</code><span class="sig-paren">(</span><em class="sig-param">phi1</em>, <em class="sig-param">phi2=None</em>, <em class="sig-param">conjugates=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/modal.html#xmacmat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.modal.xmacmat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modal assurance criterion numbers, cross-matrix between two modal transformation matrices (modes stacked as columns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phi1</strong> (<em>double</em>) – reference modes</p></li>
+<li><p><strong>phi2</strong> (<em>double</em><em>, </em><em>optional</em>) – modes to compare with, if not given (i.e., equal default value None), phi1 vs phi1 is assumed</p></li>
+<li><p><strong>conjugates</strong> (<em>True</em><em>, </em><em>optional</em>) – check the complex conjugates of all modes as well (should normally be True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>macs</strong> – matrix of MAC numbers</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="koma.modal.xmacmat_alt">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">xmacmat_alt</code><span class="sig-paren">(</span><em class="sig-param">phi1</em>, <em class="sig-param">phi2=None</em>, <em class="sig-param">conjugates=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/modal.html#xmacmat_alt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.modal.xmacmat_alt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternative implementation. Modal assurance criterion numbers, cross-matrix between two modal transformation matrices (modes stacked as columns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phi1</strong> (<em>double</em>) – reference modes</p></li>
+<li><p><strong>phi2</strong> (<em>double</em><em>, </em><em>optional</em>) – modes to compare with, if not given (i.e., equal default value None), phi1 vs phi1 is assumed</p></li>
+<li><p><strong>conjugates</strong> (<em>True</em><em>, </em><em>optional</em>) – check the complex conjugates of all modes as well (should normally be True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>macs</strong> – matrix of MAC numbers</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<span class="target" id="module-koma.clustering"></span><div class="section" id="clustering-analysis-module">
+<h2>Clustering analysis module<a class="headerlink" href="#clustering-analysis-module" title="Permalink to this headline">¶</a></h2>
+<p>All functions related to the clustering of poles for automatic OMA.</p>
+<dl class="function">
+<dt id="koma.clustering.crossdiff">
+<code class="sig-prename descclassname">koma.clustering.</code><code class="sig-name descname">crossdiff</code><span class="sig-paren">(</span><em class="sig-param">arr</em>, <em class="sig-param">relative=False</em>, <em class="sig-param">allow_negatives=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/clustering.html#crossdiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.clustering.crossdiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish cross difference matrix used for clustering analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr</strong> (<em>double</em>) – array to provide cross difference of (n_points long)</p></li>
+<li><p><strong>relative</strong> (<em>False</em><em>, </em><em>optional</em>) – output relative difference or absolute difference</p></li>
+<li><p><strong>allow_negatives</strong> (<em>False</em><em>, </em><em>optional</em>) – whether or not to allow negative difference</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>diff</strong> – cross-difference matrix (n_points-by-n_points)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>double</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Kvåle and Øiseth <a class="bibtex reference internal" href="references.html#kvale2020" id="id10">[6]</a></p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="code_matlab.html" class="btn btn-neutral float-right" title="MATLAB code reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation and usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, K.A. Kvåle
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

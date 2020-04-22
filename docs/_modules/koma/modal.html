@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>koma.modal &mdash; KOMA 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> KOMA
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code_python.html">Python code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code_matlab.html">MATLAB code reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../licensing.html">Licensing information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">KOMA</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>koma.modal</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for koma.modal</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">##############################################</span>
+<span class="sd">Modal post-processing module</span>
+<span class="sd">##############################################</span>
+<span class="sd">All functions related to the processing of results from OMA methods or in general.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="xmacmat"><a class="viewcode-back" href="../../code_python.html#koma.modal.xmacmat">[docs]</a><span class="k">def</span> <span class="nf">xmacmat</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">conjugates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modal assurance criterion numbers, cross-matrix between two modal transformation matrices (modes stacked as columns).</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi1 : double</span>
+<span class="sd">        reference modes</span>
+<span class="sd">    phi2 : double, optional</span>
+<span class="sd">        modes to compare with, if not given (i.e., equal default value None), phi1 vs phi1 is assumed</span>
+<span class="sd">    conjugates : True, optional</span>
+<span class="sd">        check the complex conjugates of all modes as well (should normally be True)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    macs : boolean</span>
+<span class="sd">        matrix of MAC numbers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># If no phi2 is given, assign value of phi1</span>
+    <span class="k">if</span> <span class="n">phi2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">phi2</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="n">phi1</span>
+        
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">phi1</span><span class="p">))</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">phi1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">phi2</span><span class="p">))</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">phi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">phi2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># norms1 = np.dot(np.expand_dims(np.sum(phi1.T * phi1.T.conj(), axis=1), axis=0), np.expand_dims(np.sum(phi2.T * phi2.T.conj(),axis=1), axis=1))</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">phi2</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phi2</span><span class="o">.</span><span class="n">T</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+
+
+    <span class="k">if</span> <span class="n">conjugates</span><span class="p">:</span>
+        <span class="n">macs1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">phi2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">norms</span><span class="p">)</span>
+        <span class="n">macs2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">phi2</span><span class="o">.</span><span class="n">conj</span><span class="p">()))</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">norms</span><span class="p">)</span>     
+        <span class="n">macs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">macs1</span><span class="p">,</span> <span class="n">macs2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">macs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">phi2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">norms</span><span class="p">)</span>
+
+    <span class="n">macs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">macs</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">macs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">macs</span> <span class="o">=</span> <span class="n">macs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">macs</span></div>
+    
+
+<div class="viewcode-block" id="xmacmat_alt"><a class="viewcode-back" href="../../code_python.html#koma.modal.xmacmat_alt">[docs]</a><span class="k">def</span> <span class="nf">xmacmat_alt</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">conjugates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Alternative implementation. Modal assurance criterion numbers, cross-matrix between two modal transformation matrices (modes stacked as columns).</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi1 : double</span>
+<span class="sd">        reference modes</span>
+<span class="sd">    phi2 : double, optional</span>
+<span class="sd">        modes to compare with, if not given (i.e., equal default value None), phi1 vs phi1 is assumed</span>
+<span class="sd">    conjugates : True, optional</span>
+<span class="sd">        check the complex conjugates of all modes as well (should normally be True)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    macs : boolean</span>
+<span class="sd">        matrix of MAC numbers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">phi2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">phi2</span> <span class="o">=</span> <span class="n">phi1</span>
+    
+    <span class="k">if</span> <span class="n">phi1</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">phi1</span> <span class="o">=</span> <span class="n">phi1</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">phi2</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">phi2</span> <span class="o">=</span> <span class="n">phi2</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">phi2</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">phi2</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span> <span class="o">@</span> <span class="n">B</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">conjugates</span><span class="p">:</span>
+        <span class="n">macs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">phi2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">norms</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">phi2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">norms</span><span class="p">)</span>     <span class="c1">#maximum = element-wise max</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">macs</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">phi2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">norms</span>
+    
+    <span class="n">macs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">macs</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">macs</span></div>
+
+
+<div class="viewcode-block" id="mac"><a class="viewcode-back" href="../../code_python.html#koma.modal.mac">[docs]</a><span class="k">def</span> <span class="nf">mac</span><span class="p">(</span><span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modal assurance criterion number from comparison of two mode shapes.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi1 : double</span>
+<span class="sd">        first mode</span>
+<span class="sd">    phi2 : double</span>
+<span class="sd">        second mode</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    mac_value : boolean</span>
+<span class="sd">        MAC number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mac_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">phi2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">phi1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">phi1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">phi2</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">phi2</span><span class="p">))))</span>
+    <span class="k">return</span> <span class="n">mac_value</span></div>
+
+
+<div class="viewcode-block" id="maxreal"><a class="viewcode-back" href="../../code_python.html#koma.modal.maxreal">[docs]</a><span class="k">def</span> <span class="nf">maxreal</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rotate complex vectors (stacked column-wise) such that the absolute values of the real parts are maximized.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi : double</span>
+<span class="sd">        complex-valued modal transformation matrix (column-wise stacked mode shapes)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi_max_real : boolean</span>
+<span class="sd">        complex-valued modal transformation matrix, with vectors rotated to have maximum real parts</span>
+<span class="sd">    &quot;&quot;&quot;</span>   
+
+    <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">phi_max_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">phi</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;complex&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">phi</span><span class="p">)[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">rot_mode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">phi</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">angles</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">))</span>
+        <span class="n">max_angle_ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">rot_mode</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">phi_max_real</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">]</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">angles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_angle_ix</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">phi</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">])))</span>
+
+    <span class="k">return</span> <span class="n">phi_max_real</span></div>
+
+
+<div class="viewcode-block" id="align_modes"><a class="viewcode-back" href="../../code_python.html#koma.modal.align_modes">[docs]</a><span class="k">def</span> <span class="nf">align_modes</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flip complex-valued or real-valued mode shapes such that similar modes have the same sign.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi : double</span>
+<span class="sd">        complex-valued (or real-valued) modal transformation matrix (column-wise stacked mode shapes)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi_aligned : boolean</span>
+<span class="sd">        aligned complex-valued (or real-valued) modal transformation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>   
+
+    <span class="n">prod</span> <span class="o">=</span> <span class="p">(</span><span class="n">phi</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">phi</span><span class="p">)</span>
+    <span class="n">most_equal_ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">prod</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+    <span class="n">modes_to_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">prod</span><span class="p">)[:,</span><span class="n">most_equal_ix</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">0</span>
+    <span class="n">phi_aligned</span> <span class="o">=</span> <span class="n">phi</span><span class="o">*</span><span class="mf">1.0</span>
+    <span class="n">phi_aligned</span><span class="p">[:,</span> <span class="n">modes_to_flip</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">phi</span><span class="p">[:,</span><span class="n">modes_to_flip</span><span class="p">]</span>  <span class="c1"># flip modes</span>
+    <span class="k">return</span> <span class="n">phi_aligned</span></div>
+
+
+<div class="viewcode-block" id="normalize_phi"><a class="viewcode-back" href="../../code_python.html#koma.modal.normalize_phi">[docs]</a><span class="k">def</span> <span class="nf">normalize_phi</span><span class="p">(</span><span class="n">phi</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize all complex-valued (or real-valued) mode shapes in modal transformation matrix.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi : double</span>
+<span class="sd">        complex-valued (or real-valued) modal transformation matrix (column-wise stacked mode shapes)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------------------------</span>
+<span class="sd">    phi_n : boolean</span>
+<span class="sd">        modal transformation matrix, with normalized (absolute value of) mode shapes</span>
+<span class="sd">    mode_scaling : </span>
+<span class="sd">        the corresponding scaling factors used to normalize, i.e., phi_n[:,n] * mode_scaling[n] = phi[n]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="n">phi_n</span> <span class="o">=</span> <span class="n">phi</span><span class="o">*</span><span class="mi">0</span>
+    <span class="n">n_modes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">phi</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">mode_scaling</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_modes</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_modes</span><span class="p">):</span>
+        <span class="n">mode_scaling</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">phi</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">]))</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">phi</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">phi</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">])),</span> <span class="n">mode</span><span class="p">])</span>
+        <span class="n">phi_n</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">]</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[:,</span> <span class="n">mode</span><span class="p">]</span><span class="o">/</span><span class="n">mode_scaling</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span><span class="o">*</span><span class="n">sign</span>
+
+    <span class="k">return</span> <span class="n">phi_n</span><span class="p">,</span> <span class="n">mode_scaling</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, K.A. Kvåle
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

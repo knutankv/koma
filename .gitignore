@@ -1,5 +1,4 @@
 *.pyc
-*.html
 *.bat
 docsrc/build
 docsrc/Makefile
