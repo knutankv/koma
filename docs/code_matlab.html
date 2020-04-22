@@ -88,9 +88,9 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_python.html">Python code reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">MATLAB code reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#operational-modal-analysis-module">Operational modal analysis module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#modal-post-processing-module">Modal post-processing module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#visualization-module">Visualization module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-+koma.+oma">Operational modal analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-+koma.+modal">Modal post-processing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-+koma.+vis">Visualization module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
@@ -185,16 +185,499 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="matlab-code-reference">
-<h1>MATLAB code reference<a class="headerlink" href="#matlab-code-reference" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="operational-modal-analysis-module">
-<h2>Operational modal analysis module<a class="headerlink" href="#operational-modal-analysis-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-+koma">
+<span id="matlab-code-reference"></span><h1>MATLAB code reference<a class="headerlink" href="#module-+koma" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-+koma.+oma">
+<span id="operational-modal-analysis-module"></span><h2>Operational modal analysis module<a class="headerlink" href="#module-+koma.+oma" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="+koma.+oma.covssi">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">covssi</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">fs</em>, <em class="sig-param">blockrows</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+oma.covssi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Covariance-driven SSI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>double</em>) – data matrix, with channels stacked column-wise (n_samples-by-n_channels)</p></li>
+<li><p><strong>fs</strong> (<em>double</em>) – sampling frequency</p></li>
+<li><p><strong>blockrows</strong> (<em>int</em>) – maximum number of block rows</p></li>
+<li><p><strong>orders</strong> (<em>[], optional</em>) – array or list of what orders to include</p></li>
+<li><p><strong>weighting</strong> (<em>'none', optional</em>) – what weighting type to use (‘none’ or ‘br’, or ‘cva’)</p></li>
+<li><p><strong>matrix_type</strong> (<em>'matrix_type', optional</em>) – what matrix type formulation to base computation on (‘hankel’ or ‘toeplitz’)</p></li>
+<li><p><strong>algorithm</strong> (<em>'shift', optional</em>) – what algorithm to use (‘shift’ or ‘standard’ - when using ‘standard’ the method is equivalent to NExt-ERA)</p></li>
+<li><p><strong>showinfo</strong> (<em>True, optional</em>) – whether or not to print information during computation</p></li>
+<li><p><strong>balance</strong> (<em>True, optional</em>) – whether or not to conduct balancing to the cross-correlation matrices prior to matrix operations (Cholesky and SVD)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lambd</strong> (<em>double</em>) – cell array with vectors for all modes corresponding to all orders</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – cell array with matrices containing all mode shapes corresponding to all orders</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – vector with all orders</p></li>
+<li><p><strong>weighting</strong> (<em>str</em>) – the applied weighting algorithm (not always equal input)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>Hermans and van Der Auweraer <a class="bibtex reference internal" href="references.html#hermans1999" id="id1">[1]</a> (1 in code)</p></li>
+<li><p>Van Overschee and de Moor <a class="bibtex reference internal" href="references.html#vanoverschee1996" id="id2">[2]</a> (2 in code)</p></li>
+<li><p>Rainieri and Fabbrocino <a class="bibtex reference internal" href="references.html#rainieri" id="id3">[3]</a> (3 in code)</p></li>
+<li><p>Pridham and Wilson <a class="bibtex reference internal" href="references.html#pridham2003" id="id4">[4]</a> (4 in code)</p></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="+koma.+oma.ddssi">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">ddssi</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">fs</em>, <em class="sig-param">blockrows</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+oma.ddssi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data-driven SSI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>double</em>) – data matrix, with channels stacked column-wise (n_samples-by-n_channels)</p></li>
+<li><p><strong>fs</strong> (<em>double</em>) – sampling frequency</p></li>
+<li><p><strong>blockrows</strong> (<em>int</em>) – maximum number of block rows</p></li>
+<li><p><strong>orders</strong> (<em>[], optional</em>) – array or list of what orders to include</p></li>
+<li><p><strong>weighting</strong> (<em>'upc', optional</em>) – what weighting type to use (‘pc’, ‘upc’, ‘cva’)</p></li>
+<li><p><strong>algorithm</strong> (<em>2, optional</em>) – what algorithm to use with reference to Van Overschee and de Moor <a class="bibtex reference internal" href="references.html#vanoverschee1996" id="id5">[2]</a> (1, 2 [fastest], or 3)</p></li>
+<li><p><strong>showinfo</strong> (<em>true, optional</em>) – whether or not to print information during computation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lambda</strong> (<em>double</em>) – cell array with vectors for all modes corresponding to all orders</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – cell array with matrices containing all mode shapes corresponding to all orders</p></li>
+<li><p><strong>orders</strong> (<em>int</em>) – vector with all orders</p></li>
+<li><p><strong>weighting</strong> (<em>str</em>) – the applied weighting algorithm (not always equal input)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>Van Overschee and de Moor <a class="bibtex reference internal" href="references.html#vanoverschee1996" id="id6">[2]</a> (1 in code)</p></li>
+<li><p>Rainieri and Fabbrocino <a class="bibtex reference internal" href="references.html#rainieri" id="id7">[3]</a> (2 in code)</p></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="+koma.+oma.fdd">
+<code class="sig-prename descclassname">koma.oma.</code><code class="sig-name descname">fdd</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">fs</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+oma.fdd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frequency-domain decomposition. Old implementation (2014).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>double</em>) – either (i) data matrix, with channels stacked column-wise (n_samples-by-n_channels)
+or (ii) cross-spectral density matrix with dimensions
+n_channels-by-n_channels-by-n_freqs</p></li>
+<li><p><strong>fs</strong> (<em>double</em>) – either (i) sampling frequency in Hz or (ii) array of frequencies (in
+rad/s) corresponding to the cross-spectral density input as <cite>data</cite>
+with dimensions n_freqs</p></li>
+<li><p><strong>windows</strong> (<em>2, optional</em>) – welch divisions</p></li>
+<li><p><strong>zp</strong> (<em>1, optional</em>) – zero-padding factor for spectral density estimate</p></li>
+<li><p><strong>wlim</strong> (<em>Inf, optional</em>) – freq. area of interst in rad/s: either input as [wmin, wmax] or wmax (=&gt; wmin = 0)</p></li>
+<li><p><strong>plot</strong> (<em>false, optional</em>) – plot results</p></li>
+<li><p><strong>lowpass</strong> (<em>[], optional</em>) – lowpass frequency</p></li>
+<li><p><strong>lowpassorder</strong> (<em>5, optional</em>) – butterworth lowpass filter order</p></li>
+<li><p><strong>mac</strong> (<em>0.9, optional</em>) – MAC criterion for mode to be deemed okay</p></li>
+<li><p><strong>lines</strong> (<em>4, optional</em>) – number of frequency lines to check from SVD</p></li>
+<li><p><strong>damppoints</strong> (<em>3, optional</em>) – points used in linear regression for damping estimate (EFDD)</p></li>
+<li><p><strong>dampZP</strong> (<em>1, optional</em>) – zero-padding for correlation estimate used to calculate damping
+(log. decrement)</p></li>
+<li><p><strong>peakfactor</strong> (<em>0.8, optional</em>) – requirement that the <cite>peakfactor</cite> selected peak of a mode is at least
+peakfactor * the maximum singular value found within the region
+surrounding the peak that has mac &gt; mac_crit.</p></li>
+<li><p><strong>minlength</strong> (<em>10, optional</em>) – minimum number of points in spectrum that is within MAC criterion
+to accept as mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>wp</strong> (<em>double</em>) – 1d array of peak frequencies in rad/s</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – modal transformation matrix (mode shapes stacked column-wise)</p></li>
+<li><p><strong>xi</strong> (<em>double</em>) – 1d array of critical damping ratios</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>Brincker et al. <a class="bibtex reference internal" href="references.html#brincker2000" id="id8">[5]</a></p></li>
+<li><p>Rainieri and Fabbrocino <a class="bibtex reference internal" href="references.html#rainieri" id="id9">[3]</a></p></li>
+</ul>
+</dd></dl>
+
 </div>
-<div class="section" id="modal-post-processing-module">
-<h2>Modal post-processing module<a class="headerlink" href="#modal-post-processing-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-+koma.+modal">
+<span id="modal-post-processing-module"></span><h2>Modal post-processing module<a class="headerlink" href="#module-+koma.+modal" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="+koma.+modal.find_stable_poles">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">find_stable_poles</code><span class="sig-paren">(</span><em class="sig-param">lambda</em>, <em class="sig-param">phi</em>, <em class="sig-param">order</em>, <em class="sig-param">s</em>, <em class="sig-param">stabcrit</em>, <em class="sig-param">indicator</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+modal.find_stable_poles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda</strong> (<em>double</em>) – cell array of arrays with complex-valued eigenvalues, one cell entry per order</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – cell array of matrices with complex-valued eigevectors (stacked column-wise), one cell entry per order</p></li>
+<li><p><strong>orders</strong> (<em>int</em>) – 1d array with orders corresponding to the cell array entries in lambd and phi</p></li>
+<li><p><strong>s</strong> (<em>int</em>) – stability level, see <a class="bibtex reference internal" href="references.html#kvale2017-oma" id="id10">[6]</a></p></li>
+<li><p><strong>stabcrit</strong> (<em>{'freq': 0.05, 'damping':0.1, 'mac': 0.1}, optional</em>) – criteria to be fulfilled for pole to be deemed stable</p></li>
+<li><p><strong>indicator</strong> (<em>'freq', optional</em>) – what modal indicator to use (‘freq’ or ‘mac’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lambd_stab</strong> (<em>double</em>) – array with complex-valued eigenvalues deemed stable</p></li>
+<li><p><strong>phi_stab</strong> (<em>double</em>) – 2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a mode</p></li>
+<li><p><strong>order_stab</strong> (<em>int</em>) – corresponding order for each stable mode</p></li>
+<li><p><strong>idx_stab</strong> (<em>int</em>) – indices of poles (within its order from the input) given in lambd_stab deemed stable (for indexing post)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Kvaale et al. <a class="bibtex reference internal" href="references.html#kvale2017-oma" id="id11">[6]</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="+koma.+modal.pick_stable_modes">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">pick_stable_modes</code><span class="sig-paren">(</span><em class="sig-param">lambda_stab</em>, <em class="sig-param">phi_stab</em>, <em class="sig-param">slack</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+modal.pick_stable_modes" title="Permalink to this definition">¶</a></dt>
+<dd><p>FIND_STABLE_MODES Pick stable modes from arrays of lambdas.
+Use like this: [lambda,phi,order,idx] = pick_stable_modes(lambda, phi, slack, phi_ref)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambd_stab</strong> (<em>double</em>) – array with complex-valued eigenvalues deemed stable by
+find_stable_poles</p></li>
+<li><p><strong>phi_stab</strong> (<em>double</em>) – 2d array with complex-valued eigenvectors (stacked as columns) deemed
+stable by <cite>find_stable_poles</cite>, each column corresponds to a mode</p></li>
+<li><p><strong>slack</strong> (<em>double</em>) – allowed relative deviance between different modes input for them to be
+clustered together as the same mode (3-by-1, [freq, xi, mac])</p></li>
+<li><p><strong>phi_ref</strong> (<em>double, optional</em>) – reference modal matrix, MAC slack value corresponds to slack from this
+if input. If not wanted, use []. Note slack(1) and slack(2) not used in this mode!</p></li>
+<li><p><strong>maxmacdeviance</strong> (<em>0.2, optional</em>) – restricts the deviance from the ref. mode shape (value of 0.2 =&gt; MAC&gt;0.8)</p></li>
+<li><p><strong>onlyone</strong> (<em>true, optional</em>) – if true,  only one mode is identified per reference - otherwise,
+multiple modes within slack limits are selected</p></li>
+<li><p><strong>mean</strong> (<em>true, optional</em>) – if true, the statistical mean of all within slack is used instead of
+the single pole with largest MAC. The standard deviations are reported
+in lambda_std and phi_std. Only applicable when phi_ref is input.</p></li>
+<li><p><strong>slack_mode</strong> (<em>'all', optional</em>) – ‘all’ (all have to be within) or ‘one’ (okay if only one is)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lambda_picked</strong> (<em>double</em>) – array with selected lambdas</p></li>
+<li><p><strong>phi_picked</strong> (<em>double</em>) – phi with stable mode shapes (stacked column-wise)</p></li>
+<li><p><strong>statistics</strong> (<em>struct</em>) – structure with statistics for each mode cluster</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="+koma.+modal.resasref">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">resasref</code><span class="sig-paren">(</span><em class="sig-param">lambda</em>, <em class="sig-param">phi</em>, <em class="sig-param">phi_ref</em>, <em class="sig-param">maccrit</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+modal.resasref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restructure modes as reference (shuffle the mode numbering).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambd</strong> (<em>double</em>) – array of all eigenvalues</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – modal transformtaion matrix (all mode shapes), stacked column-wise</p></li>
+<li><p><strong>phi_ref</strong> (<em>int</em>) – modal transformation matrix from reference (the one to sort after)</p></li>
+<li><p><strong>maccrit</strong> (<em>int</em>) – MAC criterion (nan/empty if not satisfied)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lambda_save</strong> (<em>double</em>) – output lambda (picked and sorted from lambda)</p></li>
+<li><p><strong>phi_save</strong> (<em>double</em>) – output phi (picked and sorted from phi)</p></li>
+<li><p><strong>okrefidx</strong> (<em>int</em>) – indices related to reference that are deemed ok</p></li>
+<li><p><strong>okididx</strong> (<em>int</em>) – indices related to input phi that are deemed ok</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="+koma.+modal.xmacmat">
+<code class="sig-prename descclassname">koma.modal.</code><code class="sig-name descname">xmacmat</code><span class="sig-paren">(</span><em class="sig-param">phi1</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+modal.xmacmat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modal assurance criterion numbers, cross-matrix between two modal transformation matrices (modes stacked as columns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phi1</strong> (<em>double</em>) – reference modes</p></li>
+<li><p><strong>phi2</strong> (<em>double, optional</em>) – modes to compare with, if not given (i.e., equal default value None), phi1 vs phi1 is assumed</p></li>
+<li><p><strong>conjugates</strong> (<em>true, optional</em>) – check the complex conjugates of all modes as well (should normally be true)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>macs</strong> – matrix of MAC numbers</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
-<div class="section" id="visualization-module">
-<h2>Visualization module<a class="headerlink" href="#visualization-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-+koma.+vis">
+<span id="visualization-module"></span><h2>Visualization module<a class="headerlink" href="#module-+koma.+vis" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="+koma.+vis.animate_mode">
+<code class="sig-prename descclassname">koma.vis.</code><code class="sig-name descname">animate_mode</code><span class="sig-paren">(</span><em class="sig-param">phi</em>, <em class="sig-param">w</em>, <em class="sig-param">griddef</em>, <em class="sig-param">elements</em>, <em class="sig-param">slave</em>, <em class="sig-param">active_nodes</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+vis.animate_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot translational part of mode, by inputting translational mode shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phi</strong> (<em>double</em>) – complex-valued mode shape to plot (translational part only)</p></li>
+<li><p><strong>w</strong> (<em>double</em>) – scalar frequency value (rad/s) in which to animate the mode vibration</p></li>
+<li><p><strong>griddef</strong> (<em>double</em>) – matrix defining the nodes of the model (see Notes for details)</p></li>
+<li><p><strong>elements</strong> (<em>int</em>) – matrix defining the elements of the model, connecting the node numbers
+together as patches or beams (see Notes for details)</p></li>
+<li><p><strong>slave</strong> (<em>int</em>) – matrix defining linear relations between DOFs (see Notes for details)</p></li>
+<li><p><strong>active_nodes</strong> (<em>int</em>) – Index of nodes that are active (highlighted). If empty, all nodes are assumed active!</p></li>
+<li><p><strong>movietitle</strong> (<em>str, optional</em>) – title (name) for movie file (if not given a dialog will appear)</p></li>
+<li><p><strong>fps</strong> (<em>30, optional</em>) – frames per second of generated video file</p></li>
+<li><p><strong>laps</strong> (<em>1, optional</em>) – laps to animate the mode</p></li>
+<li><p><strong>rotations</strong> (<em>0, optional</em>) – rotations (pan-style) about the z-axis during animation</p></li>
+<li><p><strong>xi</strong> (<em>0, optional</em>) – damping estimate for mode, used for animation</p></li>
+<li><p><strong>cam</strong> (<em>0, optional</em>) – as for plot_mode, camera defintions</p></li>
+<li><p><strong>complexmode</strong> (<em>true, optional</em>) – wheter or not to plot the complex mode</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>All of the optional inputs to plot_mode are valid as input as well.
+Please refer to doc of <cite>plot_mode</cite>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="+koma.+vis.plot_mode">
+<code class="sig-prename descclassname">koma.vis.</code><code class="sig-name descname">plot_mode</code><span class="sig-paren">(</span><em class="sig-param">phi</em>, <em class="sig-param">griddef</em>, <em class="sig-param">elements</em>, <em class="sig-param">slave</em>, <em class="sig-param">active_nodes</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+vis.plot_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot translational part of mode, by inputting translational mode shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phi</strong> (<em>double</em>) – complex-valued mode shape to plot (translational part only)</p></li>
+<li><p><strong>griddef</strong> (<em>double</em>) – matrix defining the nodes of the model (see Notes for details)</p></li>
+<li><p><strong>elements</strong> (<em>int</em>) – matrix defining the elements of the model, connecting the node numbers
+together as patches or beams (see Notes for details)</p></li>
+<li><p><strong>slave</strong> (<em>int</em>) – matrix defining linear relations between DOFs (see Notes for details)</p></li>
+<li><p><strong>active_nodes</strong> (<em>int</em>) – Index of nodes that are active (highlighted). If empty, all nodes are assumed active!</p></li>
+<li><p><strong>scaling</strong> (<em>[], optional</em>) – numerical value defining linear scaling of displacement vector
+([] results in automatic scaling).</p></li>
+<li><p><strong>scalefactor</strong> (<em>1, optional</em>) – second factor used to adjust automatic scaling</p></li>
+<li><p><strong>axishandle</strong> (<em>[], optional</em>) – axis handle to make plot in</p></li>
+<li><p><strong>cam</strong> (<em>[], optional</em>) – camera properties</p></li>
+<li><p><strong>cmdir</strong> (<em>'abs', optional</em>) – component to base the colormap on (‘abs’, ‘x’, ‘y’ or ‘z’)</p></li>
+<li><p><strong>colormap</strong> (<em>[], optional</em>) – predefined colormap vector (max and min val.), [] leads to auto.</p></li>
+<li><p><strong>plots</strong> (<em>'both', optional</em>) – which deformation state to plot (‘both, ‘undeformed’, or ‘deformed’)</p></li>
+<li><p><strong>labels</strong> (<em>'none', optional</em>) – put labels on the figure (which state)? (‘both’, ‘undeformed’,
+‘deformed’, or ‘none’)</p></li>
+<li><p><strong>title</strong> (<em>'', optional</em>) – title of figure, at position as defined in <cite>cam</cite></p></li>
+<li><p><strong>axis</strong> (<em>false, optional</em>) – whether or not to show axis</p></li>
+<li><p><strong>edge</strong> (<em>'both', optional</em>) – show edge color for surfaces (‘both’, ‘undeformed’, ‘deformed’, ‘none’)</p></li>
+<li><p><strong>nodes</strong> (<em>'both', optional</em>) – switch for nodes (‘both’,’active’, or’inactive’)</p></li>
+<li><p><strong>lines</strong> (<em>true, optional</em>) – switch for lines showing displacements</p></li>
+<li><p><strong>renderer</strong> (<em>'zbuffer', optional</em>) – figure renderer (‘zbuffer’, ‘painters’, or ‘opengl’)</p></li>
+<li><p><strong>maxreal</strong> (<em>true, optional</em>) – make the real part as big as possible or not</p></li>
+<li><p><strong>linewidth</strong> (<em>1, optional</em>) – line width on edges and lines</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>axis_handle</strong> (<em>obj</em>) – handle of axis object</p></li>
+<li><p><strong>scaling</strong> (<em>double</em>) – used scaling</p></li>
+<li><p><strong>cm</strong> (<em>obj</em>) – used colormap</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><cite>griddef</cite>, <cite>elements</cite> and <cite>slave</cite> follow the exact same definition as for
+the MACEC toolbox. See details below.</p>
+<p><strong>griddef</strong> is exemplified as follows for arbitrary three nodes (exclude header):</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head" colspan="3"></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Node no.</p></th>
+<th class="head"><p>X</p></th>
+<th class="head"><p>Y</p></th>
+<th class="head"><p>Z</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>0.1</p></td>
+<td><p>0.2</p></td>
+<td><p>0.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>-2</p></td>
+<td><p>0.3</p></td>
+<td><p>10</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>3D input is required even if the analysis is 2D. Other than that, its definition
+is assumed self-explanatory.</p>
+<p><strong>elements</strong> is exemplified as follows (exclude header):</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 33%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Node 1</p></th>
+<th class="head"><p>Node 2</p></th>
+<th class="head"><p>Node 3</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>2</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>3</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>This example creates two elements: (1) a patch between nodes 1,2, and 3
+and (2) a beam element between nodes 2 and 3 (node 3 = 0 =&gt; beam element).
+If no patch elements are needed, the table’s first two columns are
+sufficient.</p>
+<p><strong>slave</strong> is exemplified as follows (exclude header):</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 5%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 15%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head" colspan="3"></th>
+<th class="head"></th>
+<th class="head" colspan="3"></th>
+</tr>
+<tr class="row-even"><th class="head"><p>Master</p></th>
+<th class="head"><p>X</p></th>
+<th class="head"><p>Y</p></th>
+<th class="head"><p>Z</p></th>
+<th class="head"><p>Slave</p></th>
+<th class="head"><p>X</p></th>
+<th class="head"><p>Y</p></th>
+<th class="head"><p>Z</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>2</p></td>
+<td><p>0.3</p></td>
+<td><p>0.7</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>4</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>5</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>The displacement of the slave node is defined based on the displacement of
+the master node in either X, Y or Z direction. A unity value indicates that
+this is the local DOF to use as master (keep the others equal 0). The
+amplitudes of the different DOFs of the slave nodes are defined by the
+values in the latter three columns.</p>
+<ul>
+<li><p>The example table above describes the following slave-master definition:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Node  1, DOF X, dictates the motion of node 2 by a
+factor 0.3 on the X-component and a factor of 0.7 on the Y-component.</p></li>
+<li><p>Node 1, DOF Y, dictates the motion of node 4 by a factor of 1 on the
+Y-component.</p></li>
+<li><p>Node 3, DOF X, dictates the motion of node 5 by a factor of 1 on the
+X-component.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="+koma.+vis.stabplot">
+<code class="sig-prename descclassname">koma.vis.</code><code class="sig-name descname">stabplot</code><span class="sig-paren">(</span><em class="sig-param">lambda</em>, <em class="sig-param">phi</em>, <em class="sig-param">orders</em>, <em class="sig-param">varargin</em><span class="sig-paren">)</span><a class="headerlink" href="#+koma.+vis.stabplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>STABPLOT Plot stabilization plot from lambda and phi arrays (output from covssi).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda</strong> (<em>double</em>) – cell array of arrays with complex-valued eigenvalues, one cell entry per order</p></li>
+<li><p><strong>phi</strong> (<em>double</em>) – cell array of matrices with complex-valued eigevectors (stacked column-wise), one cell entry per order
+matrix)</p></li>
+<li><p><strong>orders</strong> (<em>int</em>) – 1d array with orders corresponding to the cell array entries in lambd and phi</p></li>
+<li><p><strong>s</strong> (<em>int, optional</em>) – stability level, see <a class="bibtex reference internal" href="references.html#kvale2017-oma" id="id12">[6]</a></p></li>
+<li><p><strong>stabcrit</strong> (<em>{'freq': 0.05, 'damping':0.1, 'mac': 0.1}, optional</em>) – criteria to be fulfilled for pole to be deemed stable</p></li>
+<li><p><strong>indicator</strong> (<em>'freq', optional</em>) – what modal indicator to use (‘freq’ or ‘mac’)</p></li>
+<li><p><strong>plots</strong> (<em>'both', optional</em>) – what poles to plot (‘both’ or ‘stable’)</p></li>
+<li><p><strong>markers</strong> (<em>'.', optional</em>) – first value applies to all poles, second to stable poles</p></li>
+<li><p><strong>markersize</strong> (<em>[36], optional</em>) – first value applies to all poles, second to stable poles</p></li>
+<li><p><strong>colors</strong> (<em>{'r' 'k'}, optional</em>) – first value applies to all poles, second to stable poles</p></li>
+<li><p><strong>picked_lambda</strong> (<em>[], optional</em>) – plot vertical lines of these lambda values</p></li>
+<li><p><strong>picked_error</strong> (<em>[], optional</em>) – plot corresponding error bar (frequency, abs(lambda), and not lambda)
+relying on thirdparty contribution by Jos van der Geest, <cite>herrorbar</cite></p></li>
+<li><p><strong>figure</strong> (<em>[], optional</em>) – specified figure handle</p></li>
+<li><p><strong>selection</strong> (<em>false, optional</em>) – whether or not to enable selection of poles for plotting and output</p></li>
+<li><p><strong>grid</strong> (<em>[], optional</em>) – if selection is true, this is used to plot mode shape</p></li>
+<li><p><strong>elements</strong> (<em>[], optional</em>) – if selection is true, this is used to plot mode shape</p></li>
+<li><p><strong>slave</strong> (<em>[], optional</em>) – if selection is true, this is used to plot mode shape</p></li>
+<li><p><strong>active_nodes</strong> (<em>[], optional</em>) – if selection is true, this is used to plot mode shape</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Jos (10584) (2020). HERRORBAR (<a class="reference external" href="https://www.mathworks.com/matlabcentral/fileexchange/3963-herrorbar">https://www.mathworks.com/matlabcentral/fileexchange/3963-herrorbar</a>), MATLAB Central File Exchange. Retrieved April 21, 2020.</p>
+</dd></dl>
+
 </div>
 </div>
 
