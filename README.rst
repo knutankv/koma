@@ -28,11 +28,11 @@ or install directly from the python package index.
    pip install git+https://www.github.com/knutankv/koma.git@master
 
 
-Thereafter, import the package as follows:
+Thereafter, import the package modules, exemplified for the `oma´ module, as follows:
     
 .. code-block:: python
 
-    import koma
+    import koma.oma
 
 
 MATLAB

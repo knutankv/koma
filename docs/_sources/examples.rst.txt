@@ -1,7 +1,7 @@
 Examples
 ====================
 
-Simple examples are provided for both `Python` and `MATLAB`:
+Some simple examples are provided for both `Python` and `MATLAB`. More will be added at a later point in time.
 
 .. toctree::
    
