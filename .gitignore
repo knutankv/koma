@@ -1,7 +1,4 @@
 *.pyc
 *.html
 *.bat
-docs/build
-dist/
-build/
-koma_KAK.egg-info
+docsrc/_build/
