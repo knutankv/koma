@@ -1,4 +1,6 @@
 *.pyc
 *.html
 *.bat
-docsrc/_build/
+docsrc/build
+docsrc/Makefile
+docsrc/make.bat
