@@ -14,14 +14,14 @@ or install directly from the python package index.
 
 .. code-block::
 
-   pip install koma
+   pip install git+https://www.github.com/knutankv/koma.git@master
+   
 
-
-Thereafter, import the package modules as follows:
+Thereafter, import the package as follows:
     
 .. code-block:: python
 
-    from koma import oma, modal, clustering
+    import koma
 
 
 MATLAB
