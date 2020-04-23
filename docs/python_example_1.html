@@ -449,7 +449,7 @@ div.rendered_html tbody tr:hover {
 <span class="n">stabcrit</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;freq&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span> <span class="s1">&#39;damping&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span> <span class="s1">&#39;mac&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">}</span>
 
 <span class="c1"># Noise specification</span>
-<span class="n">noise_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">noise_factor</span> <span class="o">=</span> <span class="mf">1.0</span>
 </pre></div>
 </div>
 </div>
@@ -496,7 +496,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">lambd</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">koma</span><span class="o">.</span><span class="n">oma</span><span class="o">.</span><span class="n">covssi</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">orders</span><span class="p">)</span>
+<span></span><span class="n">lambd</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">koma</span><span class="o">.</span><span class="n">oma</span><span class="o">.</span><span class="n">covssi</span><span class="p">(</span><span class="n">data_noised</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">orders</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
