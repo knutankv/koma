@@ -1,3 +1,5 @@
 sphinx_rtd_theme
 sphinxcontrib-napoleon
 sphinxcontrib-matlabdomain
+sphinxcontrib-bibtex
+nbsphinx
