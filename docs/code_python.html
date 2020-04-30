@@ -90,6 +90,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#operational-modal-analysis-module">Operational modal analysis module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#modal-post-processing-module">Modal post-processing module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#clustering-analysis-module">Clustering analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualization-module">Visualization module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="code_matlab.html">MATLAB code reference</a></li>
@@ -547,6 +548,38 @@ corresponds to the cross-correlation matrix for a given time lag</p>
 </dl>
 <p class="rubric">References</p>
 <p>Kvåle and Øiseth <a class="bibtex reference internal" href="references.html#kvale2020" id="id10">[7]</a></p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-koma.plot"></span><div class="section" id="visualization-module">
+<h2>Visualization module<a class="headerlink" href="#visualization-module" title="Permalink to this headline">¶</a></h2>
+<p>All functions related to the plotting of results from OMA methods.</p>
+<dl class="function">
+<dt id="koma.plot.stabplot">
+<code class="sig-prename descclassname">koma.plot.</code><code class="sig-name descname">stabplot</code><span class="sig-paren">(</span><em class="sig-param">lambda_stab</em>, <em class="sig-param">order_stab</em>, <em class="sig-param">frequency_unit='rad/s'</em>, <em class="sig-param">damped_freq=False</em>, <em class="sig-param">overlay_x=None</em>, <em class="sig-param">overlay_y=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/koma/plot.html#stabplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#koma.plot.stabplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot stabilization plot from lambda and phi arrays (output from covssi). Based on plotly =&gt; web browser is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambd_stab</strong> (<em>double</em>) – array with complex-valued eigenvalues deemed stable</p></li>
+<li><p><strong>phi_stab</strong> (<em>double</em>) – 2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a mode</p></li>
+<li><p><strong>frequency_unit</strong> (<em>{'rad/s'</em><em>, </em><em>'Hz'</em><em>, </em><em>'s'}</em><em>, </em><em>optional</em>) – what frequency unit to use (‘s’ or ‘period’ enforces period rather than frequency)</p></li>
+<li><p><strong>damped_freq</strong> (<em>False</em><em>, </em><em>optional</em>) – whether or not to use damped frequency (or period) values in plot (False enforces undamped freqs)</p></li>
+<li><p><strong>overlay_x</strong> (<em>double</em><em>, </em><em>optional</em>) – [not yet implemented] frequency values of plot to overlay, typically spectrum of data</p></li>
+<li><p><strong>overlay_y</strong> (<em>double</em><em>, </em><em>optional</em>) – [not yet implemented] function values of plot to overlay, typically spectrum of data</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<dl class="simple">
+<dt>By hovering a point, the following data about the point will be given in tooltip:</dt><dd><ul class="simple">
+<li><p>Natural frequency / period in specified unit (damped or undamped)</p></li>
+<li><p>Order</p></li>
+<li><p>Critical damping ratio in % (xi)</p></li>
+<li><p>Index of pole (corresponding to inputs lambda_stab and order_stab)</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

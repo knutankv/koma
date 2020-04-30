@@ -1,5 +1,5 @@
 function [f] = stabplot(lambda, phi, orders, varargin)
-%% STABPLOT Plot stabilization plot from lambda and phi arrays (output from covssi).
+%% Plot stabilization plot from lambda and phi arrays (output from covssi).
 % 
 % Arguments
 % ---------------------------

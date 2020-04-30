@@ -11,3 +11,6 @@ Python code reference
     
 .. automodule:: koma.clustering 
     :members:
+
+.. automodule:: koma.plot 
+    :members:
