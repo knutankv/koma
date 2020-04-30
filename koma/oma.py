@@ -447,7 +447,7 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
         array with complex-valued eigenvalues deemed stable
     phi_stab : double
         2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a mode
-    order_stab : int
+    orders_stab : int
         corresponding order for each stable mode
     idx_stab : int
         indices of poles (within its order from the input) given in lambd_stab deemed stable (for indexing post)
@@ -470,7 +470,7 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
 
     lambd_stab = []
     phi_stab = []
-    order_stab = []
+    orders_stab = []
     idx_stab = []
     
     # Establish for all orders above stablevel
@@ -508,9 +508,9 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
             if stab>=s:
                 lambd_stab.append(lambd[order_ix][pole_ix])
                 phi_stab.append(phi[order_ix][:, pole_ix])
-                order_stab.append(orders[order_ix])
+                orders_stab.append(orders[order_ix])
                 idx_stab.append(pole_ix)
                 
     phi_stab = np.array(phi_stab).T
             
-    return lambd_stab, phi_stab, order_stab, idx_stab
+    return lambd_stab, phi_stab, orders_stab, idx_stab

@@ -19,6 +19,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
-    namespace_packages=['sphinxcontrib']
+    python_requires='>=3.6'
 )
