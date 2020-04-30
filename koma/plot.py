@@ -33,11 +33,11 @@ def stabplot(lambda_stab, order_stab, frequency_unit='rad/s', damped_freq=False,
     Notes
     ----------------------------
     By hovering a point, the following data about the point will be given in tooltip:
+        
          * Natural frequency / period in specified unit (damped or undamped)
          * Order 
          * Critical damping ratio in % (xi)
          * Index of pole (corresponding to inputs lambda_stab and order_stab)
-
     """
     
     if damped_freq:
