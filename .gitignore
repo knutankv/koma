@@ -1,5 +1,6 @@
 *.pyc
 *.bat
-docsrc/build
-docsrc/Makefile
-docsrc/make.bat
+_build
+_static
+_templates
+build
