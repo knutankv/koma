@@ -6,17 +6,9 @@
 Welcome to the KOMA documentation!
 ==============================================
 
-.. only:: html
-
-    .. image:: koma-logo.svg
-        :width: 300px
-        :target: index.html
-
-.. only:: latex
-
-    .. image:: koma-logo.png
-        :width: 200px
-        :target: index.html
+.. image:: koma-logo.svg
+    :width: 300px
+    :target: index.html
 
 KOMA is a package for operational modal analysis, with core functionality available both in Python and MATLAB languages. 
 For additional details about the implementation of the covariance-driven stochastic subspace identification algorithm please refer to :cite:`Kvale2017_OMA`.
