@@ -13,8 +13,8 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../'))
-matlab_src_dir = os.path.abspath('../')
+sys.path.insert(0, os.path.abspath('../../'))
+matlab_src_dir = os.path.abspath('../../')
 matlab_keep_package_prefix = True
 from recommonmark.parser import CommonMarkParser
 from recommonmark.transform import AutoStructify
@@ -61,6 +61,14 @@ master_doc = 'index'
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+nbsphinx_prolog = r"""
+.. raw:: html
+
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js'></script>
+    <script>require=requirejs;</script>
+
+"""
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

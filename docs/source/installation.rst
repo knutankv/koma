@@ -18,7 +18,7 @@ or install directly from the python package index.
    
 
 Thereafter, import the package modules, exemplified for the `oma´ module, as follows:
-    
+
 .. code-block:: python
 
     import koma.oma
