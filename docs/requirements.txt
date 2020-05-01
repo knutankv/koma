@@ -3,3 +3,4 @@ sphinxcontrib-matlabdomain
 recommonmark
 nbsphinx
 plotly
+sphinx==2.4.0
