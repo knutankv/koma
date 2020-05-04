@@ -1,12 +1,12 @@
 =================================
 Licensing information
 =================================
-Please cite both the original research paper for which the code was developed for and the `the code <https://zenodo.org/record/3760635>`_ if used in research. 
+Please cite both the original research paper for which the code was developed for and the `the code <https://doi.org/10.5281/zenodo.3760634>`_ if used in research. 
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3760635.svg
-   :target: https://doi.org/10.5281/zenodo.3760635
-   
-   
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3760634.svg
+   :target: https://doi.org/10.5281/zenodo.3760634
+
+
 The software is licensed under the MIT license:
 
     Copyright (c) 2020 Knut Andreas Kvåle
