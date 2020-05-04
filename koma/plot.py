@@ -80,14 +80,14 @@ def stabplot(lambda_stab, orders_stab, freq_range=None, frequency_unit='rad/s', 
     xi_stab = -np.real(lambda_stab)/np.abs(lambda_stab)
 
     # Rewrite xi as %, and make string
-    xi_str = [f'{xi_i*100:.2f}%' for xi_i in xi_stab]
+    text = [f'xi = {xi_i*100:.2f}% <br> ix = {ix}' for ix, xi_i in enumerate(xi_stab)]
 
-    htemplate = f'{tooltip_name}' + ' = %{x:.2f} ' + f'{frequency_unit}<br>n =' + ' %{y}' +'<br>xi  = %{text}'
+    htemplate = f'{tooltip_name}' + ' = %{x:.2f} ' + f'{frequency_unit}<br>n =' + ' %{y}' +'<br> %{text}'
     
-    stable_poles = pd.DataFrame({'freq': x, 'xi':xi_str, 'order':orders_stab, 'ix':ix})
+    stable_poles = pd.DataFrame({'freq': x, 'order':orders_stab})
     scatter_trace =  go.Scatter(
                 x=stable_poles['freq'], y=stable_poles['order'], mode='markers', name='',
-                hovertemplate = htemplate, text=xi_str,
+                hovertemplate = htemplate, text=text,
                 marker={'color':'#4682b4'}
                 )
 
