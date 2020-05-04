@@ -5,7 +5,7 @@ KOMA
 
 KOMA is a package for operational modal analysis, with core functionality available both in Python and MATLAB languages. For additional details about the implementation of the covariance-driven stochastic subspace identification algorithm please refer to [1]. Data-SSI and FDD are implemented in the MATLAB version of KOMA. For automatic OMA and clustering analysis, please refer to [2]. More information and functionality will be added after publication of the cited paper. 
 
-Please refer to the `documentation <https://knutankv.github.io/koma/>`_ for more details.
+Please refer to the `documentation <https://koma.readthedocs.io/>`_ for more details.
 
 
 Installation and usage
@@ -67,10 +67,10 @@ inside the folder at the root of the `private` folder.
 
 Citation
 =======================
-Please cite both the original research paper for which the code was developed for [1] and `the code <https://zenodo.org/record/3760635>`_ if used in research. 
+Please cite both the original research paper for which the code was developed for [1] and `the code <https://doi.org/10.5281/zenodo.3760634>`_ if used in research. 
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3760635.svg
-   :target: https://doi.org/10.5281/zenodo.3760635
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3760634.svg
+   :target: https://doi.org/10.5281/zenodo.3760634
 
 Support
 =======================
