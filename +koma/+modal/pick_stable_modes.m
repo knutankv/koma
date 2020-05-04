@@ -1,5 +1,5 @@
 function [lambda_picked, phi_picked, statistics] = pick_stable_modes(lambda_stab, phi_stab, slack, varargin)
-%% FIND_STABLE_MODES Pick stable modes from arrays of lambdas.
+%% Pick stable modes from arrays of lambdas.
 % Use like this: [lambda,phi,order,idx] = pick_stable_modes(lambda, phi, slack, phi_ref)
 %
 %
