@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/knutankv/koma",
     packages=setuptools.find_packages(),
-    install_requires=['numpy', 'scipy', 'matplotlib', 'plotly'],
+    install_requires=['numpy', 'scipy', 'matplotlib', 'plotly', 'pandas', 'pyperclip'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
