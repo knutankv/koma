@@ -9,7 +9,8 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 
-def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_unit='rad/s', damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', renderer='browser_legacy', pole_settings=None, selected_pole_settings=None, to_clipboard='none'):
+def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_unit='rad/s', damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', 
+    renderer='browser_legacy', pole_settings=None, selected_pole_settings=None, to_clipboard='none', return_ix=False):
     """
     Generate plotly-based stabilization plot from output from find_stable_poles.
 
@@ -42,6 +43,8 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     to_clipboard : {'df', 'ix', 'none'}, optional
         update clipboard every time a pole is added, keeping selected indices or table
         'df' is not operational yet
+    return_ix : False, optional
+        whether or not to return second variable with indices - this is updated as more poles are selected
         
 
     Returns
@@ -166,6 +169,7 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     
     # Callback function for selection poles
     ix = np.arange(0, len(lambd))
+    ix_sel = []
             
     def update_table():
         df = pd.DataFrame(data={'ix': ix[select_status], 'freq': x[select_status], 'xi':100*xi[select_status]})
@@ -193,7 +197,8 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
                 trace.marker = current_settings
         
         update_table()
-        
+        ix_sel = ix[select_status]
+
         if to_clipboard == 'ix':
             export_ix_list()
         elif to_clipboard == 'df':
@@ -207,8 +212,7 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     
     def export_ix_list():
         import pyperclip #requires pyperclip
-        ix_list = ix[select_status]
-        ix_str = '[' + ', '.join(str(i) for i in ix_list) + ']'
+        ix_str = '[' + ', '.join(str(i) for i in ix_sel) + ']'
         pyperclip.copy(ix_str)
 
     if renderer == 'browser_legacy':
@@ -218,7 +222,10 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
         fig.show(renderer=renderer, include_mathjax='cdn')
  
     
-    return fig
+    if return_ix:
+        return fig, ix_sel
+    else:
+        return fig
 
 
 def listify_each_dict_entry(dict_in, n):
