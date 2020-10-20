@@ -23,7 +23,7 @@ def xmacmat(phi1, phi2=None, conjugates=True):
 
     Returns
     ---------------------------
-    macs : boolean
+    macs : double
         matrix of MAC numbers
     """
     # If no phi2 is given, assign value of phi1
@@ -193,3 +193,33 @@ def normalize_phi(phi):
         phi_n[:, mode] = phi[:, mode]/mode_scaling[mode]*sign
 
     return phi_n, mode_scaling
+
+
+def mpc(phi):
+    # Based on the current paper:
+    # Pappa, R. S., Elliott, K. B., & Schenk, A. (1993). 
+    # Consistent-mode indicator for the eigensystem realization algorithm. 
+    # Journal of Guidance, Control, and Dynamics, 16(5), 852–858.
+
+    # Ensure on matrix format
+    if phi.ndim == 1:
+        phi = phi[:,np.newaxis]
+
+    n_modes = np.shape(phi)[1]
+    mpc_val = [None]*n_modes
+
+    for mode in range(0,n_modes):
+        phin = phi[:, mode]
+        Sxx = np.dot(np.real(phin), np.real(phin))
+        Syy = np.dot(np.imag(phin), np.imag(phin))
+        Sxy = np.dot(np.real(phin), np.imag(phin))
+
+        eta = (Syy-Sxx)/(2*Sxy)
+
+        lambda1 = (Sxx+Syy)/2 + Sxy*np.sqrt(eta**2+1)
+        lambda2 = (Sxx+Syy)/2 - Sxy*np.sqrt(eta**2+1)
+
+        mpc_val[mode] = ((lambda1-lambda2)/(lambda1+lambda2))**2
+
+    mpc_val = np.array(mpc_val)
+    return mpc_val
