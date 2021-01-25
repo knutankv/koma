@@ -513,4 +513,4 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
                 
     phi_stab = np.array(phi_stab).T
             
-    return lambd_stab, phi_stab, orders_stab, idx_stab
+    return np.array(lambd_stab), phi_stab, np.array(orders_stab), np.array(idx_stab)

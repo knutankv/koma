@@ -167,6 +167,7 @@ class PoleClusterer:
         self.lambd = lambd
         self.phi = phi
         self.order = order
+        self.cluster()
 
     def cluster(self):
         """
@@ -176,7 +177,7 @@ class PoleClusterer:
         self.tot_diff = establish_tot_diff(self.lambd, self.phi, self.order, boolean_stops=self.boolean_stops, scaling=self.scaling)
         self.clusterer.fit(self.tot_diff)
 
-    def postprocess(self, prob_threshold=0.0):
+    def postprocess(self, prob_threshold=0.0, grouped_output=True, damping_and_freq=True):
         """
         Postprocess cluster object (sort and restrict).
 
@@ -185,6 +186,8 @@ class PoleClusterer:
         prob_threshold : 0.0, optional
             threshold value for probability of point belonging 
             to its determined cluster
+        grouped_output : True, optional
+            either given as full flat arrays or nested (grouped)
 
         Returns
         ---------------------------
@@ -192,6 +195,14 @@ class PoleClusterer:
             sorted/remaining eigenvalues after restrictions/sort
         phi_used : double
             sorted/remaining eigenvectors after restrictions/sort
+        order_stab_used : double
+            corresponding orders
+        group_ix : int
+            indices (sorted based on damped natural freq.) of modes
+        all_single_ix : double 
+            index corresponding to input data
+        probs : double
+            probabilities of all points in all clusters
     
         """
 
@@ -228,7 +239,7 @@ class PoleClusterer:
 
         # Remove double results (more poles at same order within same cluster)
         keep_single_ix = [None]*n_labels
-        for label in range(0, n_labels):
+        for label in range(0, n_labels):           
             relevant_orders = self.order[keep_ix][labels==label]
             unique_relevant_orders = np.unique(relevant_orders)
             groups = [np.where(o==relevant_orders)[0] for o in unique_relevant_orders]
@@ -241,12 +252,33 @@ class PoleClusterer:
             keep_single_ix[label] = np.array(keep_best_ix)
 
         all_single_ix = np.hstack(keep_single_ix)
-        labels = labels[all_single_ix]
+        group_ixs = labels[all_single_ix]
         probs = probs[all_single_ix]
-
         order_stab_used = self.order[keep_ix][all_single_ix]
         lambd_used = self.lambd[keep_ix][all_single_ix]
-
         phi_used = phi0[:, keep_ix][:, all_single_ix]
 
-        return lambd_used, phi_used
+        return lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs
+
+def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs):
+    '''
+    Group output given by PoleClusterer.postprocess()
+    '''  
+    n_groups = len(np.unique(group_ixs))
+    xi_cluster = [None]*n_groups
+    omega_n_cluster = [None]*n_groups
+    lambd_cluster = [None]*n_groups
+    phi_cluster = [None]*n_groups
+    order_cluster = [None]*n_groups
+    probs_cluster = [None]*n_groups
+    
+    for group_ix in range(n_groups):
+        this_ix = group_ixs==group_ix
+        lambd_cluster[group_ix] = lambd_used[this_ix]
+        xi_cluster[group_ix] = -np.real(lambd_used[this_ix])/np.abs(lambd_used[this_ix])
+        omega_n_cluster[group_ix] = np.abs(lambd_used[this_ix])
+        phi_cluster[group_ix] = phi_used[:, this_ix]
+        order_cluster[group_ix] = lambd_used[this_ix]
+        probs_cluster[group_ix] = probs[this_ix]
+    
+    return xi_cluster, omega_n_cluster, phi_cluster, order_cluster, probs_cluster
