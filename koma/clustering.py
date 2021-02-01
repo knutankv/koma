@@ -262,7 +262,37 @@ class PoleClusterer:
 
 def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs):
     '''
-    Group output given by PoleClusterer.postprocess()
+    Group the output of PoleClusterer.postprocess()
+
+        Arguments
+    ---------------------------
+    lambd_used : double
+        sorted/remaining eigenvalues after restrictions/sort
+        to its determined cluster
+    phi_used : double
+        sorted/remaining eigenvectors after restrictions/sort
+    order_stab_used : double
+        corresponding orders
+    group_ix : int
+        indices (sorted based on damped natural freq.) of modes
+    all_single_ix : double 
+        index corresponding to input data
+    probs : double
+        probabilities of all points in all clusters
+
+    Returns
+    ---------------------------
+    xi_cluster : double
+        list of arrays with xi grouped
+    omega_n_cluster : double
+        list of arrays with omega_n grouped
+    phi_cluster : double
+        list of arrays with phi grouped
+    order_cluster : double
+        list of arrays with orders grouped
+    probs_cluster : double
+        list of arrays with probs grouped
+
     '''  
     n_groups = len(np.unique(group_ixs))
     xi_cluster = [None]*n_groups
