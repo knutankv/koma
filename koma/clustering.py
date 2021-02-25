@@ -5,7 +5,6 @@ Clustering analysis module
 All functions related to the clustering of poles for automatic OMA.
 """
 
-
 import numpy as np
 import hdbscan
 from . import modal
@@ -269,7 +268,7 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
     '''
     Group the output of PoleClusterer.postprocess()
 
-        Arguments
+    Arguments
     ---------------------------
     lambd_used : double
         sorted/remaining eigenvalues after restrictions/sort
