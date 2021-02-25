@@ -10,9 +10,9 @@ import pandas as pd
 import numpy as np
 
 def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_unit='rad/s', damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', 
-    renderer='browser_legacy', pole_settings=None, selected_pole_settings=None, to_clipboard='none', return_ix=False):
+    renderer=None, pole_settings=None, selected_pole_settings=None, to_clipboard='none', return_ix=False):
     """
-    Generate plotly-based stabilization plot from output from find_stable_poles.
+    Generate plotly-based stabilization plot from output from find_stable_poles. This is still beta!
 
     Arguments
     ---------------------------
@@ -36,7 +36,7 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
         [not yet implemented] function values of plot to overlay, typically spectrum of data
     psd_plot_scale: {'log', 'linear'}, optional
         how to plot the overlaid PSD (linear or logarithmic y-scale)
-    renderer : 'browser_legacy', optional
+    renderer : None (render no plot - manually render output object), optional
         how to plot figure, refer plotly documentation for details 
         ('svg', 'browser', 'notebook', 'notebook_connected', are examples - 
         use 'default' to give default and None to avoid plot)
@@ -183,6 +183,14 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     
     
     def toggle_pole_selection(trace, clicked_point, selector):
+        def export_df():
+            df.to_clipboard(index=False)
+        
+        def export_ix_list():
+            import pyperclip #requires pyperclip
+            ix_str = '[' + ', '.join(str(i) for i in ix_sel) + ']'
+            pyperclip.copy(ix_str)
+
         for i in clicked_point.point_inds:
             if select_status[i]:
                 for key in current_settings:
@@ -205,15 +213,6 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
             export_df()
 
     fig.data[0].on_click(toggle_pole_selection)    
-
-    
-    def export_df():
-        df.to_clipboard(index=False)
-    
-    def export_ix_list():
-        import pyperclip #requires pyperclip
-        ix_str = '[' + ', '.join(str(i) for i in ix_sel) + ']'
-        pyperclip.copy(ix_str)
 
     if renderer == 'browser_legacy':
         from plotly.offline import plot
