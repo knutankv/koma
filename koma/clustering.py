@@ -149,11 +149,6 @@ class PoleClusterer:
         scaling of predefined available variables used in total difference (available
         variables: 'mac', 'lambda_real', 'lambda_imag', 'omega_d', 'omega_n', 'order', 'xi')
 
-    Returns
-    ---------------------------
-    pole_clusterer : object
-        clusterer object
-
     References
     ---------------------------
     Kvåle and Øiseth :cite:`Kvale2020`
@@ -298,6 +293,7 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         list of arrays with probs grouped
 
     '''  
+    
     n_groups = len(np.unique(group_ixs))
     xi_cluster = [None]*n_groups
     omega_n_cluster = [None]*n_groups
