@@ -24,7 +24,7 @@ source_parsers = {
     '.md': CommonMarkParser,
 }
 
-autodoc_mock_imports = ['plotly']
+autodoc_mock_imports = ['plotly', 'hdbscan']
 
 # -- Project information -----------------------------------------------------
 
