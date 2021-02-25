@@ -9,6 +9,7 @@ import numpy as np
 import hdbscan
 from . import modal
 
+
 def crossdiff(arr, relative=False, allow_negatives=False):
     """
     Establish cross difference matrix used for clustering analysis.
@@ -122,6 +123,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None)
     tot_diff = np.sqrt(tot_diff) + boolean_stop_diff
     return tot_diff
 
+
 class PoleClusterer:
     """
     Object to create pole clusters.
@@ -154,6 +156,7 @@ class PoleClusterer:
     Kvåle and Øiseth :cite:`Kvale2020`
     """
 
+
     def __init__(self, lambd, phi, order, min_samples=20, min_cluster_size=20, alpha=1.0, boolean_stops='default', scaling=None):
         self.boolean_stops = boolean_stops
         
@@ -168,6 +171,7 @@ class PoleClusterer:
         self.order = order
         self.cluster()
 
+
     def cluster(self):
         """
         Create tot_diff matrix and HDBSCAN cluster object from input data.
@@ -175,6 +179,7 @@ class PoleClusterer:
 
         self.tot_diff = establish_tot_diff(self.lambd, self.phi, self.order, boolean_stops=self.boolean_stops, scaling=self.scaling)
         self.clusterer.fit(self.tot_diff)
+
 
     def postprocess(self, prob_threshold=0.0, grouped_output=True, damping_and_freq=True):
         """
@@ -259,6 +264,7 @@ class PoleClusterer:
 
         return lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs
 
+
 def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs):
     '''
     Group the output of PoleClusterer.postprocess()
@@ -293,7 +299,7 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         list of arrays with probs grouped
 
     '''  
-    
+
     n_groups = len(np.unique(group_ixs))
     xi_cluster = [None]*n_groups
     omega_n_cluster = [None]*n_groups
