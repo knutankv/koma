@@ -162,7 +162,12 @@ class PoleClusterer:
 
     def __init__(self, lambd, phi, order, min_samples=20, min_cluster_size=20, alpha=1.0, boolean_stops='default', scaling=None):
         self.boolean_stops = boolean_stops
-        self.scaling = None
+        
+        if scaling is None:
+            self.scaling = {'mac': 1.0, 'lambda_real': 1.0, 'lambda_imag': 1.0}
+        else:
+            self.scaling = scaling
+
         self.clusterer = hdbscan.HDBSCAN(metric='precomputed', min_samples=min_samples, min_cluster_size=min_cluster_size, alpha=alpha, gen_min_span_tree=False)
         self.lambd = lambd
         self.phi = phi
