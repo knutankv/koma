@@ -265,7 +265,7 @@ class PoleClusterer:
         return lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs
 
 
-def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs):
+def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_ixs, probs):
     '''
     Group the output of PoleClusterer.postprocess()
 
@@ -280,7 +280,7 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         corresponding orders
     group_ix : int
         indices (sorted based on damped natural freq.) of modes
-    all_single_ix : double 
+    all_single_ixs : double 
         index corresponding to input data
     probs : double
         probabilities of all points in all clusters
@@ -297,6 +297,8 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         list of arrays with orders grouped
     probs_cluster : double
         list of arrays with probs grouped
+    ixs_cluster : double
+        list of arrays with ixs corresponding to each cluster
 
     '''  
 
@@ -307,6 +309,7 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
     phi_cluster = [None]*n_groups
     order_cluster = [None]*n_groups
     probs_cluster = [None]*n_groups
+    ixs_cluster = [None]*n_groups
     
     for group_ix in range(n_groups):
         this_ix = group_ixs==group_ix
@@ -314,7 +317,19 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         xi_cluster[group_ix] = -np.real(lambd_used[this_ix])/np.abs(lambd_used[this_ix])
         omega_n_cluster[group_ix] = np.abs(lambd_used[this_ix])
         phi_cluster[group_ix] = phi_used[:, this_ix]
-        order_cluster[group_ix] = lambd_used[this_ix]
+        order_cluster[group_ix] = order_stab_used[this_ix]
         probs_cluster[group_ix] = probs[this_ix]
+        ixs_cluster[group_ix] = all_single_ixs[this_ix]
     
-    return xi_cluster, omega_n_cluster, phi_cluster, order_cluster, probs_cluster
+    return xi_cluster, omega_n_cluster, phi_cluster, order_cluster, probs_cluster, ixs_cluster
+
+
+def group_array(arr, group_ixs):
+    n_groups = len(np.unique(group_ixs))
+    arr_grouped = [None]*n_groups
+
+    for group_ix in range(n_groups):
+        this_ix = group_ixs==group_ixs
+        arr_grouped[group_ix] = arr[this_ix]
+
+    return arr_grouped

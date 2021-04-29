@@ -420,7 +420,7 @@ def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', algorith
     return lambd, phi
 
 
-def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq'):
+def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq', return_both_conjugates=False):
     """
     Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.
 
@@ -512,5 +512,16 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
                 idx_stab.append(pole_ix)
                 
     phi_stab = np.array(phi_stab).T
-            
-    return np.array(lambd_stab), phi_stab, np.array(orders_stab), np.array(idx_stab)
+    
+    lambd_stab = np.array(lambd_stab)
+    orders_stab = np.array(orders_stab)
+    idx_stab = np.array(idx_stab)
+    phi_stab = np.array(phi_stab)
+
+    if not return_both_conjugates:
+        lambd_stab = lambd_stab[::2]
+        phi_stab = phi_stab[:, ::2]
+        orders_stab = orders_stab[::2]
+        idx_stab = idx_stab[::2]
+        
+    return lambd_stab, phi_stab, orders_stab, idx_stab
