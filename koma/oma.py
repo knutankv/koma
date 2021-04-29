@@ -440,6 +440,8 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
         valid ranges of frequencies (rad/s) and damping for pole to be deemed stable
     indicator : 'freq', optional
         what modal indicator to use ('freq' or 'mac')
+    return_both_conjugates : boolean
+        whether or not to return both conjugates of each pole
 
     Returns
     ---------------------------

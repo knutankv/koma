@@ -278,7 +278,7 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         sorted/remaining eigenvectors after restrictions/sort
     order_stab_used : double
         corresponding orders
-    group_ix : int
+    group_ixs : int
         indices (sorted based on damped natural freq.) of modes
     all_single_ixs : double 
         index corresponding to input data
@@ -324,12 +324,28 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
     return xi_cluster, omega_n_cluster, phi_cluster, order_cluster, probs_cluster, ixs_cluster
 
 
-def group_array(arr, group_ixs):
+def group_array(arr, group_ixs, axis=0):
+    '''
+    Group a single output array of PoleClusterer.postprocess() based on group indices.
+
+    Arguments
+    ---------------------------
+    arr : double
+        array corresponding
+    group_ixs : int
+        indices (sorted based on damped natural freq.) of modes
+
+    Returns
+    ---------------------------
+    arr_grouped : double
+        grouped array
+    '''  
+
     n_groups = len(np.unique(group_ixs))
     arr_grouped = [None]*n_groups
 
     for group_ix in range(n_groups):
-        this_ix = group_ixs==group_ixs
-        arr_grouped[group_ix] = arr[this_ix]
+        this_ix = np.where(group_ixs==group_ix)[0]
+        arr_grouped[group_ix] = np.take(arr, this_ix, axis=axis)
 
     return arr_grouped
