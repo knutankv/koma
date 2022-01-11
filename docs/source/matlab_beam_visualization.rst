@@ -14,7 +14,7 @@ See the file `./examples/matlab/beam_modes.m`. The content and results of the fi
     active_nodes=2:8;   %corresponding to nodes with sensors, and thus has to match the dimensions of phi (/3)
 
     %% Plot mode
-    mode_n = 3;
+    mode_n = 1;
 
     x = griddef(:,2);
     phi_1d_all = cos(mode_n*(1-x/5) * pi/2);

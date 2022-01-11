@@ -1,5 +1,6 @@
 *.pyc
 *.bat
+*.asv
 _build
 _static
 _templates
