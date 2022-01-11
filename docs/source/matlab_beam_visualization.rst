@@ -1,4 +1,4 @@
-MATLAB, visualization of beam modes
+MATLAB exaple: visualization of beam modes
 --------------------------------------
 See the file `./examples/matlab/beam_modes.m`. The content and results of the file are reproduced in the following subsection.
 

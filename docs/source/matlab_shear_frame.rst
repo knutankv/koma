@@ -1,4 +1,4 @@
-Simple MATLAB example: shear frame
+MATLAB example: shear frame
 --------------------------------------
 See the file `./examples/matlab/covssi_example.m`. The content and results of the file are reproduced in the following subsection.
 
