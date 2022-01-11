@@ -181,7 +181,7 @@ class PoleClusterer:
         self.clusterer.fit(self.tot_diff)
 
 
-    def postprocess(self, prob_threshold=0.0, grouped_output=True, damping_and_freq=True):
+    def postprocess(self, prob_threshold=0.0):
         """
         Postprocess cluster object (sort and restrict).
 
@@ -190,8 +190,6 @@ class PoleClusterer:
         prob_threshold : 0.0, optional
             threshold value for probability of point belonging 
             to its determined cluster
-        grouped_output : True, optional
-            either given as full flat arrays or nested (grouped)
 
         Returns
         ---------------------------
@@ -235,7 +233,6 @@ class PoleClusterer:
         # Sort of cluster groups based on mean frequency
         wmean = [np.mean(omega_d[keep_ix][labels_unsorted==label]) for label in range(0, max(labels_unsorted)+1)]
         sort_ix = np.argsort(wmean)
-        wmean_sort = np.sort(wmean)
 
         # Rearrange labels and probs (sorted based on frequency)
         labels = np.array([np.where(sort_ix==label)[0][0] for label in labels_unsorted]).flatten()
