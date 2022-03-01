@@ -1,4 +1,4 @@
-function [lambda_stab, phi_stab, order_stab, idx_stab] = find_stable_poles(lambda, phi, order, s, stabcrit, indicator)
+function [lambda_stab, phi_stab, order_stab, idx_stab] = find_stable_poles(lambda, phi, order, s, stabcrit, indicator, varargin)
 %% Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.
 % 
 % Arguments
@@ -11,10 +11,15 @@ function [lambda_stab, phi_stab, order_stab, idx_stab] = find_stable_poles(lambd
 %     1d array with orders corresponding to the cell array entries in lambd and phi
 % s : int
 %     stability level, see :cite:`Kvale2017_OMA`
-% stabcrit : {'freq': 0.05, 'damping':0.1, 'mac': 0.1}, optional
-%     criteria to be fulfilled for pole to be deemed stable
-% indicator : 'freq', optional
+% stabcrit : [0.05, 0.1, 0.1]
+%     criteria to be fulfilled for pole to be deemed stable, ordered as [freq, damping, MAC]
+% indicator : 'freq',
 %     what modal indicator to use ('freq' or 'mac')
+% valid_freq_range : [0,Inf], optional
+%     defines valid frequencies (rad/s)
+% valid_damping_range : [0, Inf], optional
+%     defines valid critical damping ratios
+%   
 % 
 % Returns
 % ---------------------------
@@ -31,7 +36,13 @@ function [lambda_stab, phi_stab, order_stab, idx_stab] = find_stable_poles(lambd
 % --------------------------------
 % Kvaale et al. :cite:`Kvale2017_OMA`
 
+p=inputParser;
+addParameter(p,'valid_freq_range',[0, Inf]);
+addParameter(p,'valid_damping_range',[0, Inf]);
 
+parse(p,varargin{:})
+valid_freq_range = p.Results.valid_freq_range;
+valid_xi_range = p.Results.valid_damping_range;
 
 wtol=stabcrit(1);
 xitol=stabcrit(2);
@@ -69,8 +80,10 @@ for i = s+1:length(order)
             dxi = abs(xi(m)-xilast);
             dw = abs(w(m)-wlast);
             mac = koma.modal.xmacmat(philast(:,mlast),phi0(:,m),true);
+            
+            within_range = is_within(xilast, valid_xi_range) && is_within(wlast, valid_freq_range);
 
-            if (dw/wlast<=wtol)&&(dxi/xilast<=xitol) && (mac>=(1-mactol))
+            if (dw/wlast<=wtol)&&(dxi/xilast<=xitol) && (mac>=(1-mactol)) && within_range
                 stab=stab+1;
             else
                 stab=0;
@@ -85,4 +98,12 @@ for i = s+1:length(order)
             idx_stab = [idx_stab; m];
         end
     end
+    
 end
+
+    function status = is_within(value, range)
+        status = and(value >= range(1), value <= range(2));
+    end
+
+end
+

@@ -420,7 +420,9 @@ def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', algorith
     return lambd, phi
 
 
-def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq', return_both_conjugates=False):
+def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, 
+                      valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq', 
+                      return_both_conjugates=False):
     """
     Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.
 
