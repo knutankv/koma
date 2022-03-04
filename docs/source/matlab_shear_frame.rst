@@ -36,14 +36,13 @@ See the file `./examples/matlab/covssi_example.m`. The content and results of th
 
 .. code :: matlab
 
-%% Geometry data for mode interpretation
+    %% Geometry data for mode interpretation
     path='geometry\';
     slave=dlmread([path 'slave.asc']);
     elements=dlmread([path 'elements.asc']);
     griddef=dlmread([path 'grid.asc']);
     active_nodes=[4,6,8];   %corresponding to nodes in grid-matrix; the nodes that are represented in the mode shape vector
-  
-.. image:: matlab_example_psd.png
+    
 
 .. code :: matlab
 
