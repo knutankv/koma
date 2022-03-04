@@ -56,4 +56,11 @@ indicator = 'freq';
 figure(5)
 
 [lambda,phi,order] = koma.oma.covssi(data, fs, i, 'order',order);
-koma.vis.stabplot(lambda,phi,order,'plot','stable','indicator','freq','stablevel',s,'selection',true,'grid',griddef,'slave',slave,'elements',elements,'active_nodes',active_nodes, 'convert_to_hz', true)
+
+koma.vis.stabplot(lambda,phi,order,'plot','stable','indicator','freq','stablevel',s,'selection',true,'grid',griddef,'slave',slave,'elements',elements,'active_nodes',active_nodes, 'convert_to_hz', false)
+
+%% Pick stable modes
+slack = [0.1, 0.1, 0.1];
+
+[lambda_stab, phi_stab, order_stab, idx_stab] = koma.modal.find_stable_poles(lambda, phi, order, s, stabcrit, 'freq');
+[lambda_picked,phi_picked,stats] = koma.modal.pick_stable_modes(lambda_stab, phi_stab, slack);

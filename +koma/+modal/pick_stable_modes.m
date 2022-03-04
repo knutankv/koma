@@ -1,6 +1,6 @@
 function [lambda_picked, phi_picked, statistics] = pick_stable_modes(lambda_stab, phi_stab, slack, varargin)
 %% Pick stable modes from arrays of lambdas.
-% Use like this: [lambda,phi,order,idx] = pick_stable_modes(lambda, phi, slack, phi_ref)
+% Use like this: [lambda_picked, phi_picked, statistics] = pick_stable_modes(lambda_stab, phi_stab, slack, ...)
 %
 %
 % Arguments
@@ -59,7 +59,7 @@ if isempty(phi_ref)
     sorted_phi = phi_stab(:,six);
     sorted_lambda = lambda_stab(six);
     sorted_damp = -real(lambda_stab(six))./abs(lambda_stab(six));
-    MAC=modal.xmacmat(sorted_phi);
+    MAC = koma.modal.xmacmat(sorted_phi);
     modecount=1;
     mode=1;
     lambda_picked=[];
