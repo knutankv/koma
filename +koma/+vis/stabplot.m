@@ -41,6 +41,9 @@ function [f] = stabplot(lambda, phi, orders, varargin)
 %     if selection is true, this is used to plot mode shape
 % active_nodes : [], optional
 %     if selection is true, this is used to plot mode shape
+% convert_to_hz: false, optional
+%     whether the plot should show frequencies in Hz (true) or rad/s
+%     (false, default)
 %
 %
 % References
@@ -74,6 +77,7 @@ addParameter(p,'grid',[])
 addParameter(p,'elements',[])
 addParameter(p,'slave',[])
 addParameter(p,'active_nodes',[])
+addParameter(p,'convert_to_hz',false)
 parse(p,varargin{:})
 
 stabcrit=p.Results.stabcrit;
@@ -91,6 +95,7 @@ griddef = p.Results.grid;
 elements = p.Results.elements;
 slave = p.Results.slave;
 active_nodes = p.Results.active_nodes;
+convert_to_hz = p.Results.convert_to_hz;
 
 if length(markersize)==1
     markersize(2)=markersize(1);
@@ -113,14 +118,22 @@ if isempty(f)
 end
 hold on
 
+if convert_to_hz
+   freq_scaling = 1/(2*pi);
+   freq_unit = 'Hz';
+else
+   freq_scaling = 1.0;
+   freq_unit = 'rad/s';
+end
+
 if strcmp(plots,'both') || strcmp(plots,'all')
-    a=scatter(abs(lambda_vec),order_all,markers(1));
+    a=scatter(abs(lambda_vec)*freq_scaling,order_all,markers(1));
     set(a,'sizedata',markersize(1),'MarkerEdgeColor',colors{1})
     leg{length(leg)+1} = 'All poles';
 end
 
 if strcmp(plots,'both') || strcmp(plots,'stable')
-    b=scatter(abs(lambda_stab),order_stab,markers(2));
+    b=scatter(abs(lambda_stab)*freq_scaling,order_stab,markers(2));
     set(b,'sizedata',markersize(2),'MarkerEdgeColor',colors{2})
     leg{length(leg)+1} = 'Stable poles';
     dothandle=b;    % used for mouse click function
@@ -131,7 +144,7 @@ end
 
 legend(leg)
 title({[num2str(s) ' x stability '], ['Criteria: \Delta\omega/\omega < ' num2str(100*stabcrit(1)) '% and \Delta\xi/\xi < ' num2str(100*stabcrit(2)) '% and MAC > ' num2str(100*(1-stabcrit(3))) '%']});
-xlabel('Mode frequency')
+xlabel(['Mode frequency [', freq_unit, ']'])
 ylabel('Order');
 box
 
@@ -146,8 +159,8 @@ mindist = absdist/30;
 for line = 1:length(picked_lambda)
     lmd=picked_lambda(line);
     err=picked_error(line);
-    prevpos(line) = abs(lmd);
-    distances=abs((abs(lmd)-prevpos(1:line-1)));
+    prevpos(line) = abs(lmd)*freq_scaling;
+    distances=abs((abs(lmd)*freq_scaling-prevpos(1:line-1)));
     
     if any(distances<mindist)
         add = sum(distances<mindist)*0.1*max(order);
@@ -155,9 +168,9 @@ for line = 1:length(picked_lambda)
         add=0;
     end
     
-    ln=plot([abs(lmd) abs(lmd)],[0,max(order)]);
-    t=text(abs(lmd),max(order)/2+add,num2str(line));
-    e=thirdparty.herrorbar(abs(lmd),max(order)/4+add/2,err);
+    ln=plot([abs(lmd)*freq_scaling abs(lmd)*freq_scaling],[0,max(order)]);
+    t=text(abs(lmd)*freq_scaling,max(order)/2+add,num2str(line));
+    e=thirdparty.herrorbar(abs(lmd)*freq_scaling,max(order)/4+add/2,err);
     set(e,'color',ln.Color)
     set(t,'color',ln.Color,'fontsize',10,'backgroundcolor',[1,1,1],'margin',0.5,'horizontalalignment','center')
 end
@@ -190,16 +203,16 @@ end
         
         pos = get(event_obj,'Position');
         
-        wsel = pos(1); %frequency
+        freq_sel = pos(1); %frequency
         nsel = pos(2); %order
-        [~,osel] =min(abs(order-nsel)); %find index of order
-        [~,msel]=min(abs(abs(lambda{osel})-wsel)); %find number of mode for this order
-        xisel= -real(lambda{osel}(msel))/abs(lambda{osel}(msel));
+        [~,osel] = min(abs(order-nsel)); %find index of order
+        [~,msel] = min(abs(abs(lambda{osel})*freq_scaling-freq_sel)); %find number of mode for this order
+        xisel = -real(lambda{osel}(msel))/abs(lambda{osel}(msel));
                 
         output_txt = {...
             ['order = ',num2str(nsel,3)],...
             ' ',...
-            ['w = ',num2str(wsel,4)],...
+            ['freq = ',num2str(freq_sel,4), ' ',freq_unit],...
             ['xi = ', num2str(xisel*100,4) '%'],...
             ' ',...
             ['mode = ', num2str(msel,3)],...

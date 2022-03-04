@@ -56,4 +56,4 @@ indicator = 'freq';
 figure(5)
 
 [lambda,phi,order] = koma.oma.covssi(data, fs, i, 'order',order);
-koma.vis.stabplot(lambda,phi,order,'plot','stable','indicator','freq','stablevel',s,'selection',true,'grid',griddef,'slave',slave,'elements',elements,'active_nodes',active_nodes)
+koma.vis.stabplot(lambda,phi,order,'plot','stable','indicator','freq','stablevel',s,'selection',true,'grid',griddef,'slave',slave,'elements',elements,'active_nodes',active_nodes, 'convert_to_hz', true)
