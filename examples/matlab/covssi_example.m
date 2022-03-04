@@ -14,22 +14,11 @@ fs = 3.0;
 
 t = 0:1/fs:(1/fs)*(size(data, 1)-1);
 
-%% Plot results
-for i = 1:levels
-    subplot(levels,1,i)
-%     plot(t, data_clean(:,i))
-    ylabel(['Response ', num2str(i)])
-end
-xlabel('Time [s]')
-
-%% Noise plot, mid-level
+%% Response plot, mid-level
 figure(100),clf
-% noise = 0*mean(std(data_clean));
-% data = data_clean + noise*randn(size(data_clean));
 
 plot(t, data(:,2))
 hold on
-% plot(t, data_clean(:,2),'red','linewidth',2)
 xlim([0,100])
 legend({'+ 100% noise' 'Clean signal'})
 
@@ -64,3 +53,4 @@ slack = [0.1, 0.1, 0.1];
 
 [lambda_stab, phi_stab, order_stab, idx_stab] = koma.modal.find_stable_poles(lambda, phi, order, s, stabcrit, 'freq');
 [lambda_picked,phi_picked,stats] = koma.modal.pick_stable_modes(lambda_stab, phi_stab, slack);
+disp(abs(lambda_picked))
