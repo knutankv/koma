@@ -120,7 +120,8 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     scatter_trace['name'] = 'Poles'
 
     # PSD overlay trace
-    overlay_trace = go.Scatter(x=psd_freq, y=psd_y, mode='lines', name='PSD', hoverinfo='skip', line={'color':'#ffdab9'})
+    overlay_trace = go.Scatter(x=psd_freq, y=psd_y, mode='lines', name='PSD', 
+                               hoverinfo='skip', line={'color':'#ffdab9'})
     
     # Create figure object, add traces and adjust labels and axes
     # fig = go.FigureWidget(scatter_trace)
