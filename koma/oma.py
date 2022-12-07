@@ -280,7 +280,8 @@ def stack_toeplitz(R):
     return H0, H1
 
 
-def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', algorithm='shift', showinfo=True, balance=True):
+def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', 
+algorithm='shift', showinfo=True, balance=True, return_A=False):
     """
     Main function for covariance-driven SSI.
 
@@ -304,6 +305,8 @@ def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', algorith
         whether or not to print information during computation
     balance : True, optional
         whether or not to conduct balancing to the cross-correlation matrices prior to matrix operations (Cholesky and SVD)
+    return_A : False, optional
+        whether or not to output the state matrix (discrete) from the last order evaluated
 
     Returns
     ---------------------------
@@ -416,8 +419,11 @@ def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', algorith
 
     if showinfo:
         print('> Computation completed')
-
-    return lambd, phi
+    
+    if return_A:
+        return A
+    else:
+        return lambd, phi
 
 
 def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, 
