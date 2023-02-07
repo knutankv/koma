@@ -98,7 +98,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None)
     diff_vars = dict()
 
     diff_vars['mac'] = np.abs(1.0 - modal.xmacmat(phi))
-    xlambda_diff = crossdiff(lambd, relative=False, allow_negatives=True)
+    xlambda_diff = crossdiff(lambd, relative=True, allow_negatives=True)
     diff_vars['lambda_real']  = np.abs(np.real(xlambda_diff))
     diff_vars['lambda_imag']  = np.abs(np.imag(xlambda_diff))
     diff_vars['omega_n'] = np.abs(crossdiff(omega_n, relative=True))
@@ -165,7 +165,7 @@ class PoleClusterer:
         else:
             self.scaling = scaling
 
-        self.clusterer = hdbscan.HDBSCAN(metric='precomputed', min_samples=min_samples, min_cluster_size=min_cluster_size, alpha=alpha, gen_min_span_tree=False)
+        self.hdbscan_clusterer = hdbscan.HDBSCAN(metric='precomputed', min_samples=min_samples, min_cluster_size=min_cluster_size, alpha=alpha, gen_min_span_tree=False)
         self.lambd = lambd
         self.phi = phi
         self.order = order
@@ -178,10 +178,10 @@ class PoleClusterer:
         """
 
         self.tot_diff = establish_tot_diff(self.lambd, self.phi, self.order, boolean_stops=self.boolean_stops, scaling=self.scaling)
-        self.clusterer.fit(self.tot_diff)
+        self.hdbscan_clusterer.fit(self.tot_diff)
 
 
-    def postprocess(self, prob_threshold=0.0):
+    def postprocess(self, prob_threshold=0.0, normalize_and_maxreal=True):
         """
         Postprocess cluster object (sort and restrict).
 
@@ -190,6 +190,9 @@ class PoleClusterer:
         prob_threshold : 0.0, optional
             threshold value for probability of point belonging 
             to its determined cluster
+        normalize_and_maxreal : True, optional
+            whether or not to normalize each mode shape and maximize its real value 
+            (rotate all components equally much in complex plane)
 
         Returns
         ---------------------------
@@ -209,10 +212,15 @@ class PoleClusterer:
         """
 
         omega_d = np.abs(np.imag(self.lambd))
-        phi0,__ = modal.normalize_phi(np.real(modal.maxreal(self.phi)))
+
+        if normalize_and_maxreal:
+            phi0,__ = modal.normalize_phi(modal.maxreal(self.phi))
+        else:
+            phi0 = self.phi*1.0   
+    
 
         # Establish all labels
-        labels_all = self.clusterer.labels_
+        labels_all = self.hdbscan_clusterer.labels_
 
         # Align modes
         for label in np.unique(labels_all):
@@ -222,12 +230,15 @@ class PoleClusterer:
         keep_ix_temp = np.where(labels_all>=0)[0]
 
         # Apply probability threshold
-        probs_temp = self.clusterer.probabilities_[keep_ix_temp]
+        probs_temp = self.hdbscan_clusterer.probabilities_[keep_ix_temp]
         keep_ix = keep_ix_temp[probs_temp>=prob_threshold]
-        probs_unsorted = self.clusterer.probabilities_[keep_ix]
+        probs_unsorted = self.hdbscan_clusterer.probabilities_[keep_ix]
 
         # Retain only "kept" indices from arrays
         labels_unsorted = labels_all[keep_ix]
+        if len(labels_unsorted) == 0:
+            return [], [], [], [], [], []
+        
         n_labels = max(labels_unsorted)+1
             
         # Sort of cluster groups based on mean frequency
