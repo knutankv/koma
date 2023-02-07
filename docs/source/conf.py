@@ -29,7 +29,7 @@ autodoc_mock_imports = ['plotly', 'hdbscan']
 # -- Project information -----------------------------------------------------
 
 project = 'KOMA'
-copyright = '2020, K.A. Kvåle'
+copyright = '2022, K.A. Kvåle'
 author = 'K.A. Kvåle'
 
 # The full version, including alpha/beta/rc tags
