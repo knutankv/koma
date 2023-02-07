@@ -63,8 +63,6 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
          * Index of pole (corresponding to inputs lambda_stab and order_stab)
     """
 
-    
-
 
     # Treat input settings
     if pole_settings is None: pole_settings = {}
@@ -108,7 +106,7 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     # Damping ratio and index to hover
     xi = -np.real(lambd)/np.abs(lambd)
     text = [f'xi = {xi_i*100:.2f}% <br> ix = {ix}' for ix, xi_i in enumerate(xi)]     # rewrite xi as %, and make string
-    htemplate = f'{tooltip_name}' + ' = %{x:.2f} ' + f'{frequency_unit}<br>n =' + ' %{y}' +'<br> %{text}'
+    htemplate = f'{tooltip_name}' + ' = %{x:.3f} ' + f'{frequency_unit}<br>n =' + ' %{y}' +'<br> %{text}'
 
     # Construct dataframe and create scatter trace     
     poles = pd.DataFrame({'freq': x, 'order':orders})
@@ -163,7 +161,6 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
           height=1000,
           showlegend=False
           )
-    
 
     fig = go.FigureWidget(fig)  #convert to widget
     
@@ -219,7 +216,6 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
         plot(fig, include_mathjax='cdn')
     elif renderer is not None:
         fig.show(renderer=renderer, include_mathjax='cdn')
- 
     
     if return_ix:
         return fig, ix_sel

@@ -144,6 +144,22 @@ def maxreal(phi):
     return phi_max_real
 
 
+def maxreal_alt(phi, preserve_conjugates=False):
+    angles = np.expand_dims(np.arange(0,np.pi/2, 0.01), axis=0)
+    
+    if phi.ndim==1:
+        phi = np.array([phi]).T
+
+    phi_max_real = np.zeros(np.shape(phi)).astype('complex')        
+
+    for mode in range(np.shape(phi)[1]):
+        rot_mode = np.dot(np.expand_dims(phi[:, mode], axis=1), np.exp(angles*1j))
+        max_angle_ix = np.argmax(np.sum(np.real(rot_mode)**2, axis=0), axis=0)
+
+        phi_max_real[:, mode] = phi[:, mode] * np.exp(angles[0, max_angle_ix]*1j)*np.sign(sum(np.real(phi[:, mode])))
+  
+    return phi_max_real
+
 def align_modes(phi):
     """
     Flip complex-valued or real-valued mode shapes such that similar modes have the same sign.
@@ -191,6 +207,20 @@ def normalize_phi(phi):
         mode_scaling[mode] = max(abs(phi[:, mode]))
         sign = np.sign(phi[np.argmax(abs(phi[:, mode])), mode])
         phi_n[:, mode] = phi[:, mode]/mode_scaling[mode]*sign
+
+    return phi_n, mode_scaling
+
+def normalize_phi_alt(phi, include_dofs=[0,1,2,3,4,5,6], n_dofs=6):
+    phi_n = phi*0
+
+    phi_for_scaling = np.vstack([phi[dof::n_dofs, :] for dof in include_dofs])
+    mode_scaling = np.max(np.abs(phi_for_scaling), axis=0)
+    ix_max = np.argmax(np.abs(phi_for_scaling), axis=0)
+    signs = np.sign(phi_for_scaling[ix_max, range(0, len(ix_max))])
+    signs[signs==0] = 1
+    mode_scaling[mode_scaling==0] = 1
+
+    phi_n = phi/np.tile(mode_scaling[np.newaxis,:]/signs[np.newaxis,:], [phi.shape[0], 1])
 
     return phi_n, mode_scaling
 

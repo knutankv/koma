@@ -13,7 +13,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/knutankv/koma",
     packages=setuptools.find_packages(),
-    install_requires=['numpy', 'scipy', 'matplotlib', 'plotly', 'pandas', 'pyperclip', 'hdbscan'],
+    install_requires=['numpy', 'scipy', 'matplotlib', 'plotly', 'pandas'],
+    extra_require={'full': ['hdbscan==0.8.27', 'pyperclip']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
