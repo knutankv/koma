@@ -273,7 +273,7 @@ class PoleClusterer:
         return lambd_used, phi_used, order_stab_used, group_ixs, all_single_ix, probs
 
 
-def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_ixs, probs):
+def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_ixs, probs, return_lambda=False):
     '''
     Group the output of PoleClusterer.postprocess()
 
@@ -292,6 +292,8 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         index corresponding to input data
     probs : double
         probabilities of all points in all clusters
+    return_lambda : boolean
+        whether or not to return as lambda instead of xi, omega
 
     Returns
     ---------------------------
@@ -307,6 +309,8 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         list of arrays with probs grouped
     ixs_cluster : double
         list of arrays with ixs corresponding to each cluster
+    (lambd_cluster) : double, complex
+        grouped clusters of lambd, only returned if return_lambda is True (returned in stead of xi_cluster and omega_n_cluster)
 
     '''  
 
@@ -329,7 +333,10 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
         probs_cluster[group_ix] = probs[this_ix]
         ixs_cluster[group_ix] = all_single_ixs[this_ix]
     
-    return xi_cluster, omega_n_cluster, phi_cluster, order_cluster, probs_cluster, ixs_cluster
+    if return_lambda:
+        return lambd_cluster, phi_cluster, order_cluster, probs_cluster, ixs_cluster
+    else:
+        return xi_cluster, omega_n_cluster, phi_cluster, order_cluster, probs_cluster, ixs_cluster
 
 
 def group_array(arr, group_ixs, axis=0):
