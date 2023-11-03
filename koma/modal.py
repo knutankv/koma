@@ -160,6 +160,31 @@ def maxreal_alt(phi, preserve_conjugates=False):
   
     return phi_max_real
 
+def align_two_modes(phi1, phi2):
+    """
+    Determine flip sign of two complex-valued or real-valued mode shapes.
+
+    Arguments
+    ---------------------------
+    phi1 : double
+        complex-valued (or real-valued) mode shape
+        
+    phi2 : double
+        complex-valued (or real-valued) mode shape
+
+    Returns
+    ---------------------------
+    flip_sign : int
+       1 or -1 depending on if modes should be flipped or not
+    """   
+
+    prod = np.dot(phi1, phi2)
+    if np.real(prod)<0:
+        return -1
+    else:
+        return 1
+ 
+
 def align_modes(phi):
     """
     Flip complex-valued or real-valued mode shapes such that similar modes have the same sign.
@@ -210,7 +235,7 @@ def normalize_phi(phi):
 
     return phi_n, mode_scaling
 
-def normalize_phi_alt(phi, include_dofs=[0,1,2,3,4,5,6], n_dofs=6):
+def normalize_phi_alt(phi, include_dofs=[0,1,2,3,4,5,6], n_dofs=6, return_scaling=True):
     phi_n = phi*0
 
     phi_for_scaling = np.vstack([phi[dof::n_dofs, :] for dof in include_dofs])
@@ -221,8 +246,10 @@ def normalize_phi_alt(phi, include_dofs=[0,1,2,3,4,5,6], n_dofs=6):
     mode_scaling[mode_scaling==0] = 1
 
     phi_n = phi/np.tile(mode_scaling[np.newaxis,:]/signs[np.newaxis,:], [phi.shape[0], 1])
-
-    return phi_n, mode_scaling
+    if return_scaling:
+        return phi_n, mode_scaling
+    else:
+        return phi_n
 
 
 def mpc(phi):

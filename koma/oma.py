@@ -7,10 +7,22 @@ All functions related to operational modal analysis.
 
 
 import numpy as np
-from numpy.linalg import solve
 from scipy.signal import correlate
 from scipy.linalg import matrix_balance, cholesky
 from .modal import xmacmat_alt
+
+
+def freq_svd(cpsd):
+    """
+    TODO: doc
+    """
+    D = cpsd*0
+    U = cpsd*0
+    
+    for k in range(cpsd.shape[2]):
+        U[:,:,k], D[:,:,k], __ = np.linalg.svd(cpsd[:,:,k], compute_uv=True)
+
+    return U, D
 
 def is_pos_def(x):
     """
@@ -281,7 +293,7 @@ def stack_toeplitz(R):
 
 
 def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', 
-algorithm='shift', showinfo=True, balance=True, return_A=False):
+algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugates=True, return_flat=False):
     """
     Main function for covariance-driven SSI.
 
@@ -307,7 +319,11 @@ algorithm='shift', showinfo=True, balance=True, return_A=False):
         whether or not to conduct balancing to the cross-correlation matrices prior to matrix operations (Cholesky and SVD)
     return_A : False, optional
         whether or not to output the state matrix (discrete) from the last order evaluated
-
+    discard_conjugates : True, optional
+        whether or not to discard half of the poles as conjugates
+    return_flat : True, optional
+        whether or not to return flattened (directly plottable in stabplot)
+    
     Returns
     ---------------------------
     lambd : double
@@ -413,9 +429,13 @@ algorithm='shift', showinfo=True, balance=True, return_A=False):
         phi_j = C @ psi_d                          #observed part of system eigenvectors, referring to input channels
         
         # Sort and order modes 
-        sortix = np.argsort((np.abs(lambd_j)))      #find index for unique absolute values
-        lambd[j] = lambd_j[sortix]                   #keep the corresponding eigenvalues
-        phi[j] = phi_j[:, sortix]                    #and the corresponding eigenvectors
+        sortix = np.argsort(np.abs(lambd_j))      #find index for unique absolute values
+        if discard_conjugates:
+            lambd[j] = lambd_j[sortix[::2]]                   #keep the corresponding eigenvalues
+            phi[j] = phi_j[:, sortix[::2]]  
+        else:
+            lambd[j] = lambd_j[sortix]
+            phi[j] = phi_j[:, sortix]                    #and the corresponding eigenvectors
 
     if showinfo:
         print('> Computation completed')
@@ -423,10 +443,142 @@ algorithm='shift', showinfo=True, balance=True, return_A=False):
     if return_A:
         return A
     else:
-        return lambd, phi
+        if return_flat:
+            return flatten_stab_results(lambd, phi, orders)
+        else:
+            return lambd, phi
 
+
+def flatten_stab_results(lambd, phi, orders):
+    orders_flat = np.hstack([[orders[ix]]*len(lambdi) for ix,lambdi in enumerate(lambd)])
+    lambd_flat = np.hstack(lambd)
+    phi_flat = np.hstack(phi)
+    
+    return lambd_flat, phi_flat, orders_flat
 
 def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, 
+                      valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq', 
+                      return_both_conjugates=False, use_legacy=True):
+     """
+     Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.
+    
+     Arguments
+     ---------------------------
+     lambd : double
+         array with complex-valued eigenvalues (one for each pole)
+     phi : double
+         2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a pole
+     orders : int
+         corresponding order for each stable mode   
+     s : int
+         stability level, see :cite:`Kvale2017_OMA`
+     stabcrit : {'freq': 0.05, 'damping':0.1, 'mac': 0.1}, optional
+         criteria to be fulfilled for pole to be deemed stable
+     valid_range : {'freq': [0, np.inf], 'damping':[0, np.inf]}, optional
+         valid ranges of frequencies (rad/s) and damping for pole to be deemed stable
+     indicator : 'freq', optional
+         what modal indicator to use ('freq' or 'mac')
+     use_legacy : True, optional
+         for transition period - True currently, legacy option will be removed later
+
+    
+     Returns
+     ---------------------------
+     lambd_stab : double
+         array with complex-valued eigenvalues deemed stable
+     phi_stab : double
+         2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a mode
+     orders_stab : int
+         corresponding order for each stable mode
+     idx_stab : int
+         indices of poles (within its order from the input) given in lambd_stab deemed stable (for indexing post)
+         
+     References
+     --------------------------------
+     Kvåle et al. :cite:`Kvale2017_OMA`
+    
+     """   
+     
+     if use_legacy:
+         return find_stable_poles_legacy(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, 
+                               valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq', 
+                               return_both_conjugates=False)
+     
+     def get_order(orders, order0, n=0):
+         ix0 = np.where(np.unique(orders)==order0)[0]
+         order = np.unique(orders)[ix0+n]
+         return order
+     
+     wtol = stabcrit['freq']
+     xitol = stabcrit['damping']
+     mactol = stabcrit['mac']
+
+     if 'freq' not in valid_range.keys():
+         valid_range['freq'] = [0, np.inf]
+     
+     if 'damping' not in valid_range.keys():
+         valid_range['damping'] = [0, np.inf]
+     
+
+     lambd_stab = []
+     phi_stab = []
+     orders_stab = []
+     idx_stab = []
+     
+     orders_unique = np.unique(orders)
+     order_ix = orders == orders[0]
+     
+     # Establish for all orders above stablevel
+     for order in orders_unique[s:]:
+         order_ix = orders == order
+
+         omega = np.abs(lambd[order_ix])
+         xi = -np.real(lambd[order_ix])/np.abs(lambd[order_ix])
+         phi_this = phi[:, order_ix]    # modal transformation matrix for order with index i
+     
+         # Stable poles
+         for pole_ix in range(0, len(omega)):
+             stab = 0
+             for level in range(1, s+1):
+                 level_order_ix = orders==get_order(orders, order, n=-level)
+                 phi_last = phi[:, level_order_ix]
+     
+                 if indicator is 'mac':
+                     macs = xmacmat_alt(phi_last, phi_this[:, pole_ix], conjugates=True)
+                     pole_ix_last = np.argmax(macs[:,0])   #find largest mac in first column (all in matrix compared with vector)
+                 elif indicator is 'freq':
+                     omega_last = abs(lambd[level_order_ix])
+                     pole_ix_last = np.argmin(abs(omega[pole_ix]-omega_last))
+     
+                 lambd_last = lambd[level_order_ix][pole_ix_last]
+                 xi_last = -np.real(lambd_last)/abs(lambd_last)
+                 omega_last = abs(lambd_last)
+                 dxi = abs(xi[pole_ix] - xi_last)
+                 dw = abs(omega[pole_ix] - omega_last)
+                 mac = xmacmat_alt(phi_last[:, pole_ix_last], phi_this[:, pole_ix], conjugates=True)
+     
+                 if ((dw/omega_last)<=wtol) and ((dxi/xi_last)<=xitol) and (mac>=(1-mactol)) and (valid_range['freq'][0]<omega_last<valid_range['freq'][1]) and (valid_range['damping'][0]<xi_last<valid_range['damping'][1]):
+                     stab += 1
+                 else:
+                     stab = 0
+                     break
+
+             if stab>=s:
+                 lambd_stab.append(lambd[order_ix][pole_ix])
+                 phi_stab.append(phi[:,order_ix][:, pole_ix])
+                 orders_stab.append(orders[order_ix][pole_ix])
+                 idx_stab.append(pole_ix)
+                 
+     phi_stab = np.array(phi_stab).T
+     
+     lambd_stab = np.array(lambd_stab)
+     orders_stab = np.array(orders_stab)
+     idx_stab = np.array(idx_stab)
+     phi_stab = np.array(phi_stab)
+         
+     return lambd_stab, phi_stab, orders_stab, idx_stab    
+
+def find_stable_poles_legacy(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, 
                       valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq', 
                       return_both_conjugates=False):
     """

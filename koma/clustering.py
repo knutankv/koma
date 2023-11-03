@@ -64,9 +64,9 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None)
         2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a mode
     orders : int
         corresponding order for each stable mode
-    boolean_stops : 'default', optional
+    boolean_stops : None, optional
         boolean stops to remove problematic poles (refers to difference matrices), e.g., to avoid same-order poles to appear
-        in the same cluster the standard value {'order': [1, np.inf]} could be used
+        in the same cluster the standard value {'order': [1, np.inf]} could be used (enforced by setting to 'avoid_same_order')
     scaling : {'mac': 1.0, 'lambda_real': 1.0, 'lambda_imag': 1.0}, optional
         scaling of predefined available variables used in total difference (available
         variables: 'mac', 'lambda_real', 'lambda_imag', 'omega_d', 'omega_n', 'order', 'xi')
@@ -81,7 +81,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None)
     Kvåle and Øiseth :cite:`Kvale2020`
     """
 
-    if boolean_stops is 'default':
+    if boolean_stops is 'avoid_same_order':
         boolean_stops = {'order': [1, np.inf]}
                     
     elif boolean_stops is None:
@@ -144,9 +144,9 @@ class PoleClusterer:
         it is merely points falling out of the cluster
     alpha : 1.0, optional
         distance scaling parameter, implies conservativism of clustering (higher => fewer points)
-    boolean_stops : 'default', optional
+    boolean_stops : None, optional
         boolean stops to remove problematic poles (refers to difference matrices), e.g., to avoid same-order poles to appear
-        in the same cluster the standard value {'order': [1, np.inf]} could be used
+        in the same cluster the standard value {'order': [1, np.inf]} could be used (enforced by setting to 'avoid_same_order')
     scaling : {'mac': 1.0, 'lambda_real': 1.0, 'lambda_imag': 1.0}, optional
         scaling of predefined available variables used in total difference (available
         variables: 'mac', 'lambda_real', 'lambda_imag', 'omega_d', 'omega_n', 'order', 'xi')
@@ -157,7 +157,9 @@ class PoleClusterer:
     """
 
 
-    def __init__(self, lambd, phi, order, min_samples=20, min_cluster_size=20, alpha=1.0, boolean_stops='default', scaling=None):
+    def __init__(self, lambd, phi, order, min_samples=20, min_cluster_size=20, 
+                 alpha=1.0, boolean_stops=None, scaling=None):
+        
         self.boolean_stops = boolean_stops
         
         if scaling is None:
@@ -165,7 +167,10 @@ class PoleClusterer:
         else:
             self.scaling = scaling
 
-        self.hdbscan_clusterer = hdbscan.HDBSCAN(metric='precomputed', min_samples=min_samples, min_cluster_size=min_cluster_size, alpha=alpha, gen_min_span_tree=False)
+        self.hdbscan_clusterer = hdbscan.HDBSCAN(metric='precomputed', 
+                                                 min_samples=min_samples, 
+                                                 min_cluster_size=min_cluster_size, 
+                                                 alpha=alpha, gen_min_span_tree=False)
         self.lambd = lambd
         self.phi = phi
         self.order = order
@@ -177,7 +182,8 @@ class PoleClusterer:
         Create tot_diff matrix and HDBSCAN cluster object from input data.
         """
 
-        self.tot_diff = establish_tot_diff(self.lambd, self.phi, self.order, boolean_stops=self.boolean_stops, scaling=self.scaling)
+        self.tot_diff = establish_tot_diff(self.lambd, self.phi, self.order, 
+                                           boolean_stops=self.boolean_stops, scaling=self.scaling)
         self.hdbscan_clusterer.fit(self.tot_diff)
 
 
