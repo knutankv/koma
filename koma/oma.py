@@ -321,15 +321,20 @@ algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugat
         whether or not to output the state matrix (discrete) from the last order evaluated
     discard_conjugates : True, optional
         whether or not to discard half of the poles as conjugates
-    return_flat : True, optional
+    return_flat : False, optional
         whether or not to return flattened (directly plottable in stabplot)
     
     Returns
     ---------------------------
     lambd : double
-        list of arrays with complex-valued eigenvalues (each list entry correspond to one order)
+        if `return_flat` is True, `lambd` is an array with complex-valued eigenvalues (one for each pole), 
+        otherwise the variable is a list of arrays with complex-valued eigenvalues (each list entry correspond to one order)
     phi : double
-        list of 2d arrays with complex-valued eigenvectors (each list entry correspond to one order), each column corresponds to a mode
+        if `return_flat` is True, `phi` is a 2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a pole,
+        otherwise the variable is a list of 2d arrays with complex-valued eigenvectors (each list entry correspond to one order), each column corresponds to a mode
+    orders : int
+        corresponding order for each stable mode - only output if `return_flat` is True  
+
 
     References
     --------------------------------
@@ -374,7 +379,7 @@ algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugat
         print('> Establishing weighting matrices')
         print('  >> Weighting requested: %s' % (weighting.upper()))
 
-    if weighting is 'cva':  #[2] used, [1] results in ill-conditioning issues
+    if weighting is 'cva':  # [2] used, [1] results in ill-conditioning issues
         try:
             if showinfo:
                 print('  >> Establishing R+ and R-')
@@ -444,12 +449,37 @@ algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugat
         return A
     else:
         if return_flat:
-            return flatten_stab_results(lambd, phi, orders)
+            lambd_arr, phi_arr, orders_arr = flatten_stab_results(lambd, phi, orders)
+            return lambd_arr, phi_arr, orders_arr
         else:
             return lambd, phi
 
 
 def flatten_stab_results(lambd, phi, orders):
+    """
+    Flats out nested lambd and phi results.
+
+    Arguments
+    -----------------------
+    lambd : double
+        list of arrays with complex-valued eigenvalues (each list entry correspond to one order)
+    phi : double
+        list of 2d arrays with complex-valued eigenvectors (each list entry correspond to one order), each column corresponds to a mode
+    orders : int
+        array or list of what orders to include (each entry refers to each list entry in `lambd` and `phi`) 
+
+    Returns
+    -----------------------
+    lambd : double
+        array with complex-valued eigenvalues (one for each pole)
+    phi : double
+        2d array with complex-valued eigenvectors (stacked as columns), each column corresponds to a pole,
+        otherwise the variable is a 
+    orders : int
+        corresponding order for each stable mode
+
+    """
+
     orders_flat = np.hstack([[orders[ix]]*len(lambdi) for ix,lambdi in enumerate(lambd)])
     lambd_flat = np.hstack(lambd)
     phi_flat = np.hstack(phi)
