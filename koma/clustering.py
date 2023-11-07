@@ -52,7 +52,7 @@ def crossdiff(arr, relative=False, allow_negatives=False):
     return diff
 
 
-def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None):
+def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None, normalize_distances=True):
     """
     Establish total difference matrix based on input modes (from find_stable_modes).
         
@@ -70,6 +70,8 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None)
     scaling : {'mac': 1.0, 'lambda_real': 1.0, 'lambda_imag': 1.0}, optional
         scaling of predefined available variables used in total difference (available
         variables: 'mac', 'lambda_real', 'lambda_imag', 'omega_d', 'omega_n', 'order', 'xi')
+    normalize_distances : True
+        whether or not to normalize the distances (ensures compatibility between mac and other parameters)
 
     Returns
     ---------------------------
@@ -105,6 +107,11 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None)
     diff_vars['omega_d'] = np.abs(crossdiff(omega_d, relative=True))
     diff_vars['order'] = np.abs(crossdiff(order, relative=False))   #generates != integers?
     diff_vars['xi']  = np.abs(crossdiff(xi, relative=True))
+
+    # Normalize distances
+    if normalize_distances:
+        for key in diff_vars:
+            diff_vars[key] = diff_vars[key]/np.max(np.abs(diff_vars[key])[:])
 
     # Establish boolean hard stop differences
     boolean_stop_diff = np.zeros(np.shape(diff_vars['xi']))
