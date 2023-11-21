@@ -170,7 +170,11 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     ix_sel = []
             
     def update_table():
-        df = pd.DataFrame(data={'ix': ix[select_status], 'freq': x[select_status], 'xi':100*xi[select_status]})
+        df = pd.DataFrame(data={'ix': ix[select_status], 
+                                'freq': x[select_status], 
+                                'xi':100*xi[select_status]})
+        
+        df = df.sort('freq')
         
         if len(fig.data)==2:
             sel_ix = 1
