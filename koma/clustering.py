@@ -45,6 +45,7 @@ def crossdiff(arr, relative=False, allow_negatives=False):
     else:
         diff = (arr1-arr2)/scaling
 
+
     # Remove imaginary 0 if input is float (real)
     if ~np.any(np.iscomplex(arr)):
         diff = np.real(diff).astype('float')
@@ -83,7 +84,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
     Kvåle and Øiseth :cite:`Kvale2020`
     """
 
-    if boolean_stops is 'avoid_same_order':
+    if type(boolean_stops)==str and boolean_stops == 'avoid_same_order':
         boolean_stops = {'order': [1, np.inf]}
                     
     elif boolean_stops is None:
@@ -98,15 +99,25 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
 
     # Establish dictionary with available difference variables
     diff_vars = dict()
-
-    diff_vars['mac'] = np.abs(1.0 - modal.xmacmat(phi))
-    xlambda_diff = crossdiff(lambd, relative=True, allow_negatives=True)
-    diff_vars['lambda_real']  = np.abs(np.real(xlambda_diff))
-    diff_vars['lambda_imag']  = np.abs(np.imag(xlambda_diff))
-    diff_vars['omega_n'] = np.abs(crossdiff(omega_n, relative=True))
-    diff_vars['omega_d'] = np.abs(crossdiff(omega_d, relative=True))
-    diff_vars['order'] = np.abs(crossdiff(order, relative=False))   #generates != integers?
-    diff_vars['xi']  = np.abs(crossdiff(xi, relative=True))
+    if 'mac' in scaling:
+        diff_vars['mac'] = np.abs(1.0 - modal.xmacmat(phi))
+    
+    if ('lambda_real' in scaling) or ('lambda_imag' in scaling):
+        xlambda_diff = crossdiff(lambd, relative=True, allow_negatives=True)
+        diff_vars['lambda_real']  = np.abs(np.real(xlambda_diff))
+        diff_vars['lambda_imag']  = np.abs(np.imag(xlambda_diff))
+        
+    if 'omega_n' in scaling:
+        diff_vars['omega_n'] = np.abs(crossdiff(omega_n, relative=True))
+    
+    if 'omega_d' in scaling:
+        diff_vars['omega_d'] = np.abs(crossdiff(omega_d, relative=True))
+        
+    if 'order' in scaling:
+        diff_vars['order'] = np.abs(crossdiff(order, relative=False))   #generates != integers?
+        
+    if 'xi' in scaling:
+        diff_vars['xi']  = np.abs(crossdiff(xi, relative=True))
 
     # Normalize distances
     if normalize_distances:
@@ -114,7 +125,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
             diff_vars[key] = diff_vars[key]/np.max(np.abs(diff_vars[key])[:])
 
     # Establish boolean hard stop differences
-    boolean_stop_diff = np.zeros(np.shape(diff_vars['xi']))
+    boolean_stop_diff = np.zeros([lambd.shape[0], lambd.shape[0]])
     
     for key in boolean_stops.keys():
         stops = boolean_stops[key]
@@ -122,7 +133,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
         boolean_stop_diff[invalid_ix] = np.inf
      
     # Establish total difference
-    tot_diff = np.zeros(np.shape(diff_vars['xi']))
+    tot_diff = np.zeros([lambd.shape[0], lambd.shape[0]])
 
     for var in scaling:
         tot_diff += boolean_stop_diff + (diff_vars[var]*scaling[var])**2

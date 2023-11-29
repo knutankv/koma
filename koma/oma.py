@@ -9,7 +9,7 @@ All functions related to operational modal analysis.
 import numpy as np
 from scipy.signal import correlate
 from scipy.linalg import matrix_balance, cholesky
-from .modal import xmacmat_alt
+from .modal import xmacmat_alt, mpc
 
 
 def freq_svd(cpsd):
@@ -504,7 +504,7 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
          stability level, see :cite:`Kvale2017_OMA`
      stabcrit : {'freq': 0.05, 'damping':0.1, 'mac': 0.1}, optional
          criteria to be fulfilled for pole to be deemed stable
-     valid_range : {'freq': [0, np.inf], 'damping':[0, np.inf]}, optional
+     valid_range : {'freq': [0, np.inf], 'damping':[0, np.inf], 'mpc': [0,1]}, optional
          valid ranges of frequencies (rad/s) and damping for pole to be deemed stable
      indicator : 'freq', optional
          what modal indicator to use ('freq' or 'mac')
@@ -548,6 +548,11 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
      
      if 'damping' not in valid_range.keys():
          valid_range['damping'] = [0, np.inf]
+         
+     if 'mpc' not in valid_range.keys():
+         valid_range['mpc'] = [0, 1.0]
+         
+     mpc_all = mpc(phi)
      
 
      lambd_stab = []
@@ -581,13 +586,18 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
                      pole_ix_last = np.argmin(abs(omega[pole_ix]-omega_last))
      
                  lambd_last = lambd[level_order_ix][pole_ix_last]
+                 mpc_last = mpc_all[level_order_ix][pole_ix_last]
                  xi_last = -np.real(lambd_last)/abs(lambd_last)
+                 
                  omega_last = abs(lambd_last)
                  dxi = abs(xi[pole_ix] - xi_last)
                  dw = abs(omega[pole_ix] - omega_last)
                  mac = xmacmat_alt(phi_last[:, pole_ix_last], phi_this[:, pole_ix], conjugates=True)
-     
-                 if ((dw/omega_last)<=wtol) and ((dxi/xi_last)<=xitol) and (mac>=(1-mactol)) and (valid_range['freq'][0]<omega_last<valid_range['freq'][1]) and (valid_range['damping'][0]<xi_last<valid_range['damping'][1]):
+                 
+                 if (((dw/omega_last)<=wtol) and ((dxi/xi_last)<=xitol) and 
+                     (mac>=(1-mactol)) and (valid_range['freq'][0]<omega_last<valid_range['freq'][1]) 
+                     and (valid_range['damping'][0]<xi_last<valid_range['damping'][1]) and
+                     (valid_range['mpc'][0]<mpc_last<valid_range['mpc'][1])):
                      stab += 1
                  else:
                      stab = 0
