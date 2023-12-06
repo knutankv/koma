@@ -36,16 +36,14 @@ def xmacmat(phi1, phi2=None, conjugates=True):
     if len(np.shape(phi2))==1:
         phi2 = np.expand_dims(phi2, axis=0).T
 
-    # norms1 = np.dot(np.expand_dims(np.sum(phi1.T * phi1.T.conj(), axis=1), axis=0), np.expand_dims(np.sum(phi2.T * phi2.T.conj(),axis=1), axis=1))
     norms = np.real(np.sum(phi1.T * np.conj(phi1.T), axis=1))[:,np.newaxis] @ np.real(np.sum(phi2.T * np.conj(phi2.T),axis=1))[np.newaxis,:]
-
 
     if conjugates:
         macs1 = np.divide(abs(np.dot(phi1.T, phi2))**2, norms)
         macs2 = np.divide(abs(np.dot(phi1.T, phi2.conj()))**2, norms)     
         macs = np.maximum(macs1, macs2)
     else:
-        macs = np.divide(abs(np.dot(phi1.T, phi2))**2, norms)
+        macs = np.divide(abs(np.dot(phi1.T, phi2.conj()))**2, norms)
 
     macs = np.real(macs)
     
@@ -88,7 +86,7 @@ def xmacmat_alt(phi1, phi2=None, conjugates=True):
     norms = np.abs(A @ B.T)
 
     if conjugates:
-        macs = np.maximum(abs(phi1.T @ phi2)**2/norms, abs(phi1.T @ phi2)**2/norms)     #maximum = element-wise max
+        macs = np.maximum(abs(phi1.T @ phi2)**2/norms, abs(phi1.T @ phi2.conj())**2/norms)     #maximum = element-wise max
     else:
         macs = abs(phi1.T @ phi2)**2/norms
     
