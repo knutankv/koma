@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-python@v3
 
       # ADJUST THIS: install all dependencies (including pdoc)
-      - run: pip install -e . --no-dependencies
+      - run: pip install -e .
       - run: pip install pdoc3
       # ADJUST THIS: build your documentation into docs/.
       # We use a custom build script for pdoc itself, ideally you just run `pdoc -o docs/ ...` here.
