@@ -2,8 +2,8 @@
     from pdoc.html_helpers import minify_css
 %>
 
-<%def>
-  p {
+<%def filter="minify_css">
+  body {
     font-family: sans-serif
   }
 </%def>
