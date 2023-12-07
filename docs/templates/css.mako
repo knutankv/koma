@@ -2,6 +2,12 @@
     from pdoc.html_helpers import minify_css
 %>
 
+<%def>
+  p {
+    font-family: sans-serif
+  }
+</%def>
+
 <%def name="mobile()" filter="minify_css">
   :root {
     --highlight-color: #fe9;
