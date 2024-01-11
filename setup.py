@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="koma-knutankv",
-    version="1.1.0",
+    version="1.2.0",
     author="Knut Andreas Kvåle",
     author_email="knut.a.kvale@gmail.com",
     description="Knut's Operational Modal Analysis Toolbox for Python. Matlab version available under './+koma/'.",

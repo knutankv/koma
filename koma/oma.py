@@ -293,7 +293,7 @@ def stack_toeplitz(R):
 
 
 def covssi(data, fs, i, orders, weighting='none', matrix_type='hankel', 
-algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugates=True, return_flat=False):
+algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugates=True, return_flat=True):
     """
     Main function for covariance-driven SSI.
 
@@ -321,7 +321,7 @@ algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugat
         whether or not to output the state matrix (discrete) from the last order evaluated
     discard_conjugates : True, optional
         whether or not to discard half of the poles as conjugates
-    return_flat : False, optional
+    return_flat : True, optional
         whether or not to return flattened (directly plottable in stabplot)
     
     Returns
@@ -487,8 +487,8 @@ def flatten_stab_results(lambd, phi, orders):
     return lambd_flat, phi_flat, orders_flat
 
 def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 0.1, 'mac': 0.1}, 
-                      valid_range={'freq': [0, np.inf], 'damping':[0, np.inf]}, indicator='freq', 
-                      return_both_conjugates=False, use_legacy=True):
+                      valid_range={'freq': [0, np.inf], 'damping':[0, np.inf], 'mpc': [0,1]}, indicator='freq', 
+                      return_both_conjugates=False, use_legacy=False):
      """
      Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.
     
@@ -504,12 +504,12 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
          stability level, see :cite:`Kvale2017_OMA`
      stabcrit : {'freq': 0.05, 'damping':0.1, 'mac': 0.1}, optional
          criteria to be fulfilled for pole to be deemed stable
-     valid_range : {'freq': [0, np.inf], 'damping':[0, np.inf], 'mpc': [0,1]}, optional
+     valid_range : {'freq': [0, np.inf], 'damping': [0, np.inf], 'mpc': [0,1]}, optional
          valid ranges of frequencies (rad/s) and damping for pole to be deemed stable
      indicator : 'freq', optional
          what modal indicator to use ('freq' or 'mac')
-     use_legacy : True, optional
-         for transition period - True currently, legacy option will be removed later
+     use_legacy : False, optional
+         False currently, legacy option will be removed altogether later
 
     
      Returns
