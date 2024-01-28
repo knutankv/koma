@@ -13,7 +13,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/knutankv/koma",
     packages=setuptools.find_packages(),
-    install_requires=['plotly', 'pandas', 'numpy', 'git+https://github.com/scikit-learn-contrib/hdbscan.git'],
+    install_requires=['plotly', 'pandas', 'numpy', 
+                      'hdbscan @ git+https://github.com/scikit-learn-contrib/hdbscan'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
