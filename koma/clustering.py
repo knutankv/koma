@@ -53,7 +53,7 @@ def crossdiff(arr, relative=False, allow_negatives=False):
     return diff
 
 
-def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None, normalize_distances=True):
+def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None, normalize_distances=False):
     """
     Establish total difference matrix based on input modes (from find_stable_modes).
         
@@ -168,6 +168,8 @@ class PoleClusterer:
     scaling : {'mac': 1.0, 'lambda_real': 1.0, 'lambda_imag': 1.0}, optional
         scaling of predefined available variables used in total difference (available
         variables: 'mac', 'lambda_real', 'lambda_imag', 'omega_d', 'omega_n', 'order', 'xi')
+    normalize_distances : False
+        whether or not to normalize the distances (ensures compatibility between mac and other parameters)
 
     References
     ---------------------------
@@ -176,7 +178,7 @@ class PoleClusterer:
 
 
     def __init__(self, lambd, phi, order, min_samples=20, min_cluster_size=20, 
-                 alpha=1.0, boolean_stops=None, scaling=None):
+                 alpha=1.0, boolean_stops=None, scaling=None, normalize_distances=False):
         
         self.boolean_stops = boolean_stops
         
@@ -185,6 +187,7 @@ class PoleClusterer:
         else:
             self.scaling = scaling
 
+        self.normalize_distances = normalize_distances
         self.hdbscan_clusterer = hdbscan.HDBSCAN(metric='precomputed', 
                                                  min_samples=min_samples, 
                                                  min_cluster_size=min_cluster_size, 
@@ -201,7 +204,9 @@ class PoleClusterer:
         """
 
         self.tot_diff = establish_tot_diff(self.lambd, self.phi, self.order, 
-                                           boolean_stops=self.boolean_stops, scaling=self.scaling)
+                                           boolean_stops=self.boolean_stops, scaling=self.scaling,
+                                           normalize_distances=self.normalize_distances)
+        
         self.hdbscan_clusterer.fit(self.tot_diff)
 
 
