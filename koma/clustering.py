@@ -6,7 +6,8 @@ All functions related to the clustering of poles for automatic OMA.
 """
 
 import numpy as np
-import hdbscan
+# import hdbscan
+from sklearn.cluster import HDBSCAN
 from . import modal
 
 
@@ -53,7 +54,7 @@ def crossdiff(arr, relative=False, allow_negatives=False):
     return diff
 
 
-def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None, normalize_distances=False):
+def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None, normalize_distances=False, ensure_symmetric=True):
     """
     Establish total difference matrix based on input modes (from find_stable_modes).
         
@@ -73,6 +74,8 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
         variables: 'mac', 'lambda_real', 'lambda_imag', 'omega_d', 'omega_n', 'order', 'xi')
     normalize_distances : True
         whether or not to normalize the distances (ensures compatibility between mac and other parameters)
+    ensure_symmetric : True
+        ensure that output is numerically symmetric
 
     Returns
     ---------------------------
@@ -139,6 +142,10 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
         tot_diff += boolean_stop_diff + (diff_vars[var]*scaling[var])**2
 
     tot_diff = np.sqrt(tot_diff) + boolean_stop_diff
+
+    if ensure_symmetric:
+        tot_diff = (tot_diff + tot_diff.T)/2
+
     return tot_diff
 
 
@@ -178,7 +185,8 @@ class PoleClusterer:
 
 
     def __init__(self, lambd, phi, order, min_samples=20, min_cluster_size=20, 
-                 alpha=1.0, boolean_stops=None, scaling=None, normalize_distances=False):
+                 alpha=1.0, boolean_stops=None, scaling=None, normalize_distances=False,
+                 run_clustering=True):
         
         self.boolean_stops = boolean_stops
         
@@ -188,14 +196,16 @@ class PoleClusterer:
             self.scaling = scaling
 
         self.normalize_distances = normalize_distances
-        self.hdbscan_clusterer = hdbscan.HDBSCAN(metric='precomputed', 
+        self.hdbscan_clusterer = HDBSCAN(metric='precomputed', 
                                                  min_samples=min_samples, 
                                                  min_cluster_size=min_cluster_size, 
-                                                 alpha=alpha, gen_min_span_tree=False)
+                                                 alpha=alpha)
         self.lambd = lambd
         self.phi = phi
         self.order = order
-        self.cluster()
+        
+        if run_clustering:
+            self.cluster()
 
 
     def cluster(self):
@@ -205,8 +215,8 @@ class PoleClusterer:
 
         self.tot_diff = establish_tot_diff(self.lambd, self.phi, self.order, 
                                            boolean_stops=self.boolean_stops, scaling=self.scaling,
-                                           normalize_distances=self.normalize_distances)
-        
+                                           normalize_distances=self.normalize_distances,
+                                           ensure_symmetric=True)
         self.hdbscan_clusterer.fit(self.tot_diff)
 
 
