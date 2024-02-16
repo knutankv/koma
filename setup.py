@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="koma-knutankv",
-    version="1.2.2",
+    version="1.2.3",
     author="Knut Andreas Kvåle",
     author_email="knut.a.kvale@gmail.com",
     description="Knut's Operational Modal Analysis Toolbox for Python.",
@@ -13,8 +13,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/knutankv/koma",
     packages=setuptools.find_packages(),
-    install_requires=['plotly', 'pandas', 'numpy', 
-                      'scikit-learn'],
+    install_requires=['plotly', 'pandas', 'numpy', 'pyvista[jupyter]>=0.38.1',
+                      'scikit-learn', 'trame', 'ipywidgets'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
