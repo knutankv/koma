@@ -1,5 +1,5 @@
 '''
-(BASIC) MODULE FOR SPATIAL MAPPING AND VISUALIZATION
+MODULE FOR SPATIAL MAPPING AND VISUALIZATION
 '''
 import pyvista as pv
 import pyvistaqt as pvqt
@@ -12,6 +12,18 @@ def elements_from_matrix(element_matrix):
     return [Element(el[1:], label=el[0]) for el in element_matrix]
 
 class Element:
+    '''
+    Element class for creation of elements in model. Elements can have 2, 3 or 4 nodes, which 
+    dictate what type of element it representes (line, triangle, rectangle).
+
+    Arguments
+    ------------
+    nodes : `Node`
+        list of `Node` objects to connect with element
+    label : None, optional
+        requested label given to element
+
+    '''
     def __init__(self, nodes, label=None):
         self.nodes = nodes
         self.label = label
@@ -60,7 +72,24 @@ class Element:
             return self.label == other
         
 class Node:
-    def __init__(self, label, x, y, z=0):
+    '''
+    Node class for creation of nodes to use in model. Nodes can be defined by two or three coordinates.
+    If the latter, z is assumed 0. Label is required.
+
+    Arguments
+    ------------
+    label : int
+        requested label given to node
+    x : float
+        x-coordinate of node
+    y : float
+        y-coordinate of node
+    z : 0.0, optional
+        float to specify z-coordinate of node
+
+    '''
+
+    def __init__(self, label, x, y, z=0.0):
         self.x0 = x
         self.y0 = y
         self.z0 = z
@@ -109,7 +138,25 @@ def rel3(master):
 class Rel:
     def __init__(self, master=None, dof=None, fun=None):
         '''
+        Class to generate relative constraints used for more complex `dofmap` creation.
+        These are placed in relevant entries of the model `dofmap`.
 
+        Parameters
+        -------------
+        master : None, int, optional
+            node label of master node (not input if fun is given)
+        dof : None, int, optional
+            dof index of master node dof (not input if fun is given)
+        fun : Non, fun, optional
+            function to create more complex relationships
+
+        Examples
+        -------------
+        `Rel(5, 1)` instructs to assign displacements in the chosen model DOF <--- node 5, dof index 1       
+        `Rel(fun=lambda n: n(1,0)*0.5 - n(2,1)*0.2) instructs to assign displacements in the chosen model DOF from sum:
+                                                    node 1 dof index 0 (scaled 0.5) - node 2 dof index 0.2 (scaled 0.2)
+
+    
         '''
 
         self.dof = dof          # master dof
@@ -133,6 +180,7 @@ class Rel:
         
 class Model:
     '''
+    Model class for creation of models for visualizing mode shapes.
 
     Arguments
     ------------
@@ -140,8 +188,39 @@ class Model:
         list of nodes
     elements : `Line` or `Triangle`
         list of elements (either lines or triangle patches)
-    dofmap : dict optional
-        doc
+    dofmap : dict, optional
+        dictionary to map DOFs of model to DOFs of displacements
+    sensors : dict, optional
+    u : None, optional
+        displacements (with dimensions corresponding to index values provided in dofmap)
+
+    Example
+    ------------
+    Let's create a beam with an assumed sensor measuring vertical accelerations at midspan:
+    __________v__________
+    ^                   ^
+    1         2         3    < --- Node labels
+
+    The beam is 10 meters long, giving us these three nodes:
+
+        nodes = [Node(1, 0, 0, 0), Node(2, 5, 0, 0), Node(3, 10, 0, 0)]
+
+    Our elements are simply connecting node 1 to 2 and node 2 to 3:   
+        
+        elements = [Element([1,2])]
+    
+    Our dofmap would then be given as follows (assuming one DOF at midspan, along the z-direction):
+
+        dofmap = {2: [0, 0, 1]}
+
+    Let's go ahead and create our model object:
+        
+        model = Model(nodes, elements, dofmap=dofmap, sensors={'acc_z': 2})
+
+    The last (optional) input, the `sensors` dictionary simply tells the model at which nodes our sensors are placed, for convenient
+    plotting later.
+
+    A more comprehensive example is provided in the Examples folder on GitHub.
 
     '''
     def __init__(self, nodes, elements, dofmap=None, sensors={}, u=None):
@@ -166,11 +245,29 @@ class Model:
         self._u = val
     
     def deform(self, ufull):
+        '''
+        Deform system based on input full field displacements, ufull.
+        '''
+
         for node in self.nodes:
             dxyz = ufull[self.get_node_ixs(node)]
             node.x, node.y, node.z = dxyz[0]+node.x0, dxyz[1]+node.y0, dxyz[2]+node.z0
 
     def expand_field(self, u):
+        '''
+        Exapend field of subsystem u to full field based on given dofmap.
+
+        Arguments
+        ----------
+        u : float
+            displacements to assign to system
+            with dimensions corresponding to index values provided in dofmap
+        
+        Returns
+        ---------
+        ufull : float
+            displacements corresponding to full field
+        '''
         ufull = np.zeros(len(self.nodes)*3)
 
         if u is not None:
@@ -295,7 +392,89 @@ class Model:
              nodelabel_settings={}, sensorlabel_settings={},
              elementlabel_settings={}, view=None, sensor_labels=False,
              plot_states=['deformed','undeformed'], label_priority='deformed',
-             node_label_fun=None, element_label_fun=None, perspective_cam=True, background_plotter=True):
+             node_label_fun=None, element_label_fun=None, perspective_cam=False, background_plotter=True):
+
+
+        '''
+        Plot model (undeformed or deformed or both).
+
+        Arguments
+        ----------
+        pl : `pyvista.Plotter()` object, optional
+            plotter object - one will be created if not input
+        show : True, optional
+            whether or not to show plot at end - output is pl-object, which can be shown later
+        plot_lines : True, optional
+            whether or not to plot the line elements
+        plot_nodes : True, optional
+            whether or not to plot the nodes
+        node_labels : True, optional
+            whether or not to show node labels
+            if input is a list of node labels, only these are shown
+        element_labels :True, optional
+            whether or not to show element labels
+            if input is a list of element labels, only these are shown
+        plot_faces : True, optional
+            whether or not to plot face elements (triangles and rectangles)
+        canvas_settings : dict, optional
+            dictionary with additional settings for canvas
+        node_settings : dict, optional
+            dictionary with additional settings for undeformed nodes / points
+            given to `pyvista.Plotter().add_points`
+        deformed_node_settings : dict, optional
+            dictionary with additional settings for deformed nodes / points
+            given to `pyvista.Plotter().add_points`
+        line_settings : dict, optional
+            dictionary with additional settings for undeformed line elements
+            given to `pyvista.Plotter().add_mesh`
+        deformed_line_settings : dict, optional
+            dictionary with additional settings for deformed line elements
+            given to `pyvista.Plotter().add_mesh`
+        face_settings : dict, optional
+            dictionary with additional settings for undeformed patch elements
+            given to `pyvista.Plotter().add_mesh`
+        deformed_face_settings : dict, optional
+            dictionary with additional settings for deformed patch elements
+            given to `pyvista.Plotter().add_mesh`
+        nodelabel_settings : dict, optional
+            dictionary with additional settings for node labels
+            given to `pyvista.Plotter().add_point_labels`
+        sensorlabel_settings : dict, optional
+            dictionary with additional settings for sensor labels 
+            (=nodes with defined additional label)
+            given to `pyvista.Plotter().add_point_labels`
+        elementlabel_settings : dict, optional
+            dictionary with additional settings for element labels
+            given to `pyvista.Plotter().add_point_labels`
+        view : {None, 'xy', 'yx', 'xz', 'top', 'side', 'front'}, optional
+            string defining view, if None standard isometric perspective plot is given
+        sensor_labels : False, optional
+            whether or not to show sensor labels
+        plot_states : ['deformed', 'undeformed'], optional
+            which states of the system to plot
+        label_priority : str, optional 
+        node_label_fun : fun, optional
+            function to define what property from each node is given in the node label strings
+            if None, fun = lambda node: node.label
+        element_label_fun : fun, optional
+            function to define what property from each element is given in the element label strings
+            if None, fun = lambda el: el.label
+        perspective_cam : False, optional
+            whether or not to use perspective projection (parallel projection otherwise)
+        background_plotter : True, optional
+            whether or not to plot in background 
+            (meaning that Python processes in terminal can run while plot is open) 
+            if True, pyvistaqt is used to generate plot (different interface)
+     
+        Returns
+        ----------
+        pl : `pyvista.Plotter()` object
+        
+        Example
+        ---------
+        See separate notebook on GitHub for example.
+
+        '''
 
         if node_label_fun is None:
             node_label_fun = lambda n: str(int(n.label))
@@ -438,19 +617,19 @@ class Model:
         return pl
 
     
-    def animate_mode(self, phi, frequency=1.0, n_cycles=1, 
-                    frames_per_cycle=30, show=True,  **kwargs):
-        omega = frequency*2*np.pi
-        pl = self.plot(show=False, use_pvqt=True, **kwargs)
+    # def animate_mode(self, phi, frequency=1.0, n_cycles=1, 
+    #                 frames_per_cycle=30, show=True,  **kwargs):
+    #     omega = frequency*2*np.pi
+    #     pl = self.plot(show=False, use_pvqt=True, **kwargs)
 
-        duration = n_cycles*frames_per_cycle
-        def update_shape(step):
-            self.u = np.real(phi * np.exp(1j*omega*(step/duration)))
-            print(self.u)
-            pl.render()
+    #     duration = n_cycles*frames_per_cycle
+    #     def update_shape(step):
+    #         self.u = np.real(phi * np.exp(1j*omega*(step/duration)))
+    #         print(self.u)
+    #         pl.render()
 
-        timer = pvqt.plotting.QTimer()
-        timer.timeout.connect(update_shape)
-        timer.setInterval(300)
-        timer.setDuration(1000)
-        timer.start()
+    #     timer = pvqt.plotting.QTimer()
+    #     timer.timeout.connect(update_shape)
+    #     timer.setInterval(300)
+    #     timer.setDuration(1000)
+    #     timer.start()
