@@ -6,3 +6,5 @@ _static
 _templates
 build
 koma_knutankv.egg-info
+_dev
+.ipynb_checkpoints
