@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/knutankv/koma",
     packages=setuptools.find_packages(),
     install_requires=['plotly', 'pandas', 'numpy', 'pyvista[jupyter]>=0.38.1',
-                      'scikit-learn', 'trame', 'ipywidgets'],
+                      'scikit-learn', 'trame', 'ipywidgets', 'pyvistaqt'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
