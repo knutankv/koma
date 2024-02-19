@@ -499,7 +499,7 @@ class Model:
         canvas_settings = dict(background_color='white') | canvas_settings
 
         # Face plotting settings
-        face_settings = dict() | face_settings
+        face_settings = dict(show_edges=True, color='lightgray') | face_settings
 
         if plot_nodes is not False:
             if plot_nodes is True:
@@ -514,7 +514,7 @@ class Model:
                 pl = pv.Plotter()
 
             for key in canvas_settings:
-                    setattr(pl, key, canvas_settings[key])
+                setattr(pl, key, canvas_settings[key])
 
             if view is not None:
                 if view in ['xy', 'top']:
@@ -867,6 +867,7 @@ class Model:
                                         face_settings=undeformed_settings, **kwargs)
                 else:
                     pl = pv.Plotter()
+                    pl.background_color='white'
 
 
             if filename.split('.')[1].lower()=='gif':
@@ -911,6 +912,7 @@ class Model:
                                         face_settings=undeformed_settings, **kwargs)
                 else:
                     pl = pvqt.BackgroundPlotter()
+                    pl.background_color='white'
 
             pl = self.plot(pl=pl, deformed=True, **kwargs)
 
