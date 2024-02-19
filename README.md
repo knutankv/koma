@@ -31,6 +31,10 @@ from koma import oma
 
 For details, please refer to the examples. For code reference visit [knutankv.github.io/koma](https://knutankv.github.io/koma/).
 
+
+![Shear frame](https://raw.githubusercontent.com/knutankv/koma/master/mode2.gif)
+
+
 Examples
 =======================
 Examples are provided as Jupyter Notebooks in the [examples folder](https://github.com/knutankv/koma/tree/master/examples).

@@ -393,8 +393,7 @@ class Model:
                 face_settings={}, nodelabel_settings={}, sensorlabel_settings={},
                 elementlabel_settings={}, view=None, sensor_labels=False,
                 deformed=True, 
-                node_label_fun=None, element_label_fun=None, perspective_cam=False, background_plotter=True,
-                return_mesh=False):
+                node_label_fun=None, element_label_fun=None, perspective_cam=False, background_plotter=True):
 
 
         '''
@@ -468,8 +467,6 @@ class Model:
         See separate notebook on GitHub for example.
 
         '''
-
-        mesh = dict()
 
         if node_label_fun is None:
             node_label_fun = lambda n: str(int(n.label))
@@ -554,33 +551,35 @@ class Model:
                    pl.add_point_labels(np.array([node.xyz]), [sensor], **sensorlabel_settings)     
                 else:
                    pl.add_point_labels(np.array([node.xyz0]), [sensor], **sensorlabel_settings)     
-                
+
+        points = pv.pyvista_ndarray(self.get_points(deformed=deformed, flattened=False))
+
         if plot_lines:
             lines = self.get_lines()
-            mesh['lines'] = pv.PolyData(self.get_points(deformed=deformed), 
+            self.line_mesh = pv.PolyData(points, 
                         lines=lines)        
-            pl.add_mesh(mesh['lines'], **line_settings)
+            pl.add_mesh( self.line_mesh, **line_settings)
 
         if plot_faces:
             faces = self.get_faces()
-            mesh['faces'] = pv.PolyData(self.get_points(deformed=deformed),
+            self.face_mesh = pv.PolyData(points,
                         faces=faces)
         
-            pl.add_mesh(mesh['faces'], **face_settings)
+            pl.add_mesh(self.face_mesh, **face_settings)
 
         if plot_nodes:
-            pts = pl.add_points(self.get_points(nodes=nodes_to_plot, deformed=deformed, flattened=False), **node_settings)
-            mesh['nodes'] = pts.mapper.dataset
+            node_points = pv.pyvista_ndarray(self.get_points(nodes=nodes_to_plot, 
+                                                        deformed=deformed, 
+                                                        flattened=False))
+            pts = pl.add_points(node_points, **node_settings)
+            self.point_mesh = pts.mapper.dataset
         
         pl.camera.SetParallelProjection(not perspective_cam)
 
         if show:
             pl.show()
 
-        if return_mesh:
-            return pl, mesh
-        else:
-            return pl
+        return pl
 
 
 
@@ -818,35 +817,109 @@ class Model:
         return pl
 
     
-    def animate_mode(self, phi,  n_cycles=1, fps=60, add_undeformed=False, undeformed_settings={'opacity':0.2},
-                    frames_per_cycle=30, pl=None, **kwargs):
+    def animate_mode(self, phi, filename=None, pl=None, add_undeformed=False, undeformed_settings={'opacity':0.2},
+                     cycles=1, f=1.0, fps=60, **kwargs):
         
-        def update_shape():
-            self.step += 1
-            self.u = np.real(phi * np.exp(2*np.pi*1j*(self.step/duration)))
-            for mesh_comp in self.mesh.values():
-                mesh_comp.points = self.get_points(deformed=True, flattened=False)
-            self.pl.update()
-        
-        if pl is not None:
-            self.pl = pl
-        elif add_undeformed:
-            self.pl = self.plot(deformed=False, background_plotter=True, show=False, 
-                                line_settings=undeformed_settings, node_settings=undeformed_settings,
-                                face_settings=undeformed_settings, **kwargs)
-        else:
-            self.pl = pvqt.BackgroundPlotter()
-        
-        # Initial deformed plot
-        self.pl, self.mesh = self.plot(pl=self.pl, deformed=True, return_mesh=True, **kwargs)
+        '''
+        Plot model (either undeformed or deformed).
 
-        duration = n_cycles*frames_per_cycle
-        self.step = 0
-        self.pl.add_callback(update_shape, interval=int(np.round(1/fps)))  
-        self.pl.show()
-        self.pl.app.exec_()
-
-        self.pl = None
-        self.mesh = None
+        Arguments
+        ----------
+        phi : float, complex
+            1d array with considered mode shape
+            complex values supported
+        filename : None, str, optional
+            path to filename, use either `mp4` or `gif` file types (additional packages may be required)
+            if `None`, interactive mode is assumed
+        pl : `pyvista.Plotter()` object, optional
+            plotter object to base animation on - one will be created if not input
+        add_undeformed : False, optional
+            whether or not to add undeformed (reference) structure in animation
+            only applicable if `pl=None`
+        undeformed_settings : dict, optional
+            settings dict used for both lines, edges and nodes of undeformed structure
+            keywords must be valid for all these object types (therefore limited flexibility)
+            only applicable if `pl=None` and `add_undeformed=True`
+        cycles : 1, optional
+            number of cycles for stored file (not used for interactive mode)
+        f : 1.0, optional
+            frequency of rotation for stored file (not used for interactive mode)
+        fps : 60, optional
+            frames per second used for stored file (not used for interactive mode)
+        **kwargs
+            arguments supported by `spatial.plot` are passed to that method
         
-        sys.exit()
+        Example
+        ---------
+        See separate notebook on GitHub for example.
+
+        '''
+        
+        frames_per_cycle = int(np.round(fps/f))
+
+        # Save video
+        if filename is not None:
+
+            if pl is None:
+                if add_undeformed:
+                    pl = self.plot(deformed=False, background_plotter=False, show=False, 
+                                        line_settings=undeformed_settings, node_settings=undeformed_settings,
+                                        face_settings=undeformed_settings, **kwargs)
+                else:
+                    pl = pv.Plotter()
+
+
+            if filename.split('.')[1].lower()=='gif':
+                pl.open_gif(filename, fps=fps)
+            else:
+                pl.open_movie(filename)
+
+            pl = self.plot(pl=pl, deformed=True, **kwargs)
+            
+            frames = cycles*frames_per_cycle
+            dtheta = 2*np.pi * f/fps
+            theta = 0.0
+
+            for frame in range(frames):
+                theta = theta+dtheta
+                self.u = np.real(phi * np.exp(theta*1j))
+                pts = pv.pyvista_ndarray(self.get_points(deformed=True, flattened=False))
+                self.face_mesh.points = pts
+                self.line_mesh.points = pts
+                self.point_mesh.points = pts
+                pl.update()
+                pl.write_frame()
+
+            pl.close()
+
+        else:   # interactive animation           
+            # Initial deformed plot
+
+            def update_shape():
+                self.step += 1
+                self.u = np.real(phi * np.exp(2*np.pi*1j*(self.step/frames_per_cycle)))
+                pts = pv.pyvista_ndarray(self.get_points(deformed=True, flattened=False))
+                self.face_mesh.points = pts
+                self.line_mesh.points = pts
+                self.point_mesh.points = pts
+                pl.update()
+
+            if pl is None:
+                if add_undeformed:
+                    pl = self.plot(deformed=False, background_plotter=True, show=False, 
+                                        line_settings=undeformed_settings, node_settings=undeformed_settings,
+                                        face_settings=undeformed_settings, **kwargs)
+                else:
+                    pl = pvqt.BackgroundPlotter()
+
+            pl = self.plot(pl=pl, deformed=True, **kwargs)
+
+            self.step = 0
+            pl.add_callback(update_shape, interval=0)  
+            pl.show()
+            pl.app.exec_()
+        
+            sys.exit()
+
+
+    
