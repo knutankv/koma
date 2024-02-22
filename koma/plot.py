@@ -8,6 +8,163 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import colors as mcolors
+from matplotlib.backend_bases import MouseButton
+
+class FDDPlotter:
+    def __init__(self, U, D, f=None, lines=None, colors=None, ax=None, 
+                 num=None, active_settings={}, deactive_settings={}, picked_settings={},
+                 vline_settings= {}):
+        self._U = U
+        self._D = D
+        self.line_ixs = np.array(lines)
+        self.index = 0
+        self.lines = [None]*len(self.line_ixs)
+        self.n_lines = len(self.line_ixs)
+        self.active_settings = {'linewidth': 2.0, 'alpha':1.0} | active_settings
+        self.deactive_settings = {'linewidth': 1.0, 'alpha': 0.5}  | deactive_settings
+        self._picked = []
+        self.picked_dots = []
+        self.vline_settings = dict(ls='-', lw=0.5) | vline_settings
+        self.title_format = 'ix = {index}'
+
+        if f is None:
+            self.f = np.arange(self.D.shape[2])
+        else:
+            self.f = f
+
+        if ax is None:
+            plt.figure(num).clf()
+            self.fig, self.ax = plt.subplots(num=num)
+        else:
+            plt.sca(ax)
+            self.ax = ax
+            self.fig = plt.gcf()
+
+        if colors is None:
+            self.colors = list(mcolors.TABLEAU_COLORS.values())
+        else:
+            self.colors = colors
+
+    @property
+    def picked(self):
+        if len(self._picked) == 0:
+            return self._picked
+        else:
+            _picked = np.array(self._picked)
+            sort_ix = np.argsort(_picked[:,1])
+            return _picked[sort_ix, :]
+    
+    @property
+    def current_line(self):
+        return self.lines[self.index]
+
+    def get_fig(self, show=True, block=True):
+        for l in range(self.n_lines):
+            self.lines[l], = self.ax.plot(self.f, self.D[l, l, :]/np.max(self.D[l, l, :]), color=self.colors[l], linewidth=1.0, label=f'Singular line {self.line_ixs[l]}')
+        
+        self.ax.legend(frameon=False)
+        self.vline = self.ax.axvline(np.nan, **self.vline_settings)
+        self.vline.set_color(self.current_line.get_color())
+
+        self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
+        self.fig.canvas.mpl_connect('button_press_event', self.on_click)   
+        self.fig.canvas.mpl_connect('motion_notify_event', self.on_move)
+        self.fig.canvas.mpl_connect('key_press_event', self.on_keyboard)
+        self.fig.canvas.mpl_connect('close_event', self.on_close)
+        
+        if block:
+            self.title_format = 'ix = {index} (Press enter when selection is done)'
+            
+        self.update()   
+
+        if show:
+            plt.show()
+            if block:
+                self.fig.canvas.start_event_loop()
+
+        return self.fig
+
+    def on_click(self, event):
+        if event.inaxes and event.button is MouseButton.LEFT and self.fig.canvas.manager.toolbar.mode.value == '':
+            current_line = self.current_line
+            color = current_line.get_color()
+            ix_sel = np.argmin(np.abs(event.xdata - self.f))
+
+            self._picked.append([self.index, ix_sel])
+            self.picked_dots.append(self.ax.plot(self.f[ix_sel], current_line.get_ydata()[ix_sel], marker='o',
+                            markersize=7, markerfacecolor=color, markeredgecolor='red')[0])
+
+        elif event.inaxes and event.button is MouseButton.RIGHT:
+            ix_sel = np.argmin(np.abs(event.xdata - self.f))
+            picked_mat = np.array(self._picked)
+            valid_ix = np.where((picked_mat[:,0] == self.index))[0]
+            if len(valid_ix)>0:
+                row_ix = np.argmin(np.abs(ix_sel-picked_mat[valid_ix, 1]))
+                ix_remove = valid_ix[row_ix]
+
+                self._picked.pop(ix_remove)
+                self.picked_dots[ix_remove].remove()
+                self.picked_dots.pop(ix_remove)
+
+        self.fig.canvas.draw()
+
+    def on_close(self, event):
+        self.fig.canvas.stop_event_loop()
+
+    def on_keyboard(self, event):
+        if event.key == 'enter':
+            self.title_format = 'ix = {index}'
+            self.update()
+            self.fig.canvas.stop_event_loop()
+
+    def on_move(self, event):
+        if event.inaxes:
+            ix_sel = np.argmin(np.abs(event.xdata-self.f))
+            self.vline.set_xdata(self.f[ix_sel])
+            self.fig.canvas.draw()
+
+    def on_scroll(self, event):
+        increment = 1 if event.button == 'up' else -1
+        self.index = np.clip(self.index + increment, 0, self.n_lines-1)
+        self.vline.set_color(self.current_line.get_color())
+        self.update()
+
+    def update(self):
+        self.ax.set_title(self.title_format.format(index = self.line_ixs[self.index]))
+        for ix,line in enumerate(self.lines):
+            if ix==self.index:
+                line.set(**self.active_settings)
+            else:
+                line.set(**self.deactive_settings) 
+
+        self.fig.canvas.draw()
+
+    @property
+    def D(self):
+        return self._D[np.ix_(self.line_ixs, self.line_ixs, np.arange(self._D.shape[2]))]
+
+    @property
+    def U(self):
+        return self._U[np.ix_(np.arange(self._U.shape[0]), self.line_ixs, np.arange(self._U.shape[2]))]
+
+    @property
+    def freq(self):
+        if len(self.picked)>0:
+            ixs = self.picked[:, 1]
+            return self.f[ixs]
+
+    @property
+    def phi(self):
+        if len(self.picked)>0:
+            
+            phi = np.zeros([self.U.shape[0], len(self._picked)]).astype(complex)
+            for ix,pick in enumerate(self.picked):
+                phi[:, ix] = self.U[:, pick[0], pick[1]]
+
+            return phi
+
 
 def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_unit='rad/s', damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', 
     renderer=None, pole_settings=None, selected_pole_settings=None, to_clipboard='none', return_ix=False):

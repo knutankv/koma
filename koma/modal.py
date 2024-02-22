@@ -206,7 +206,7 @@ def align_modes(phi):
     return phi_aligned
 
 
-def normalize_phi(phi):
+def normalize_phi(phi, return_scaling=True):
     """
     Normalize all complex-valued (or real-valued) mode shapes in modal transformation matrix.
 
@@ -214,12 +214,14 @@ def normalize_phi(phi):
     ---------------------------
     phi : double
         complex-valued (or real-valued) modal transformation matrix (column-wise stacked mode shapes)
+    return_scaling : True, optional
+        whether or not to return scaling as second return variable
 
     Returns
     ---------------------------
     phi_n : boolean
         modal transformation matrix, with normalized (absolute value of) mode shapes
-    mode_scaling : 
+    mode_scaling : float 
         the corresponding scaling factors used to normalize, i.e., phi_n[:,n] * mode_scaling[n] = phi[n]
 
     """       
@@ -231,7 +233,10 @@ def normalize_phi(phi):
         sign = np.sign(phi[np.argmax(abs(phi[:, mode])), mode])
         phi_n[:, mode] = phi[:, mode]/mode_scaling[mode]*sign
 
-    return phi_n, mode_scaling
+    if return_scaling:
+        return phi_n, mode_scaling
+    else:
+        return phi_n
 
 def normalize_phi_alt(phi, include_dofs=[0,1,2,3,4,5,6], n_dofs=6, return_scaling=True):
     phi_n = phi*0

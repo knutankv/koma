@@ -480,7 +480,7 @@ class Model:
                                       shape_opacity=0.2) | elementlabel_settings
 
         # Node and sensor label settings
-        nodelabel_settings = dict(always_visible=True, shape_opacity=0.2)
+        nodelabel_settings = dict(always_visible=True, shape_opacity=0.2, text_color='black') | nodelabel_settings
         sensorlabel_settings = nodelabel_settings | sensorlabel_settings
 
         # Node plotting settings
@@ -582,242 +582,10 @@ class Model:
         return pl
 
 
-
-    def plot_all(self, pl=None, show=True, plot_lines=True, plot_nodes=True, 
-             node_labels=False, element_labels=False,
-             plot_faces=True, canvas_settings={}, 
-             node_settings={}, deformed_node_settings={},
-             line_settings={}, deformed_line_settings={}, 
-             face_settings={}, deformed_face_settings={}, 
-             nodelabel_settings={}, sensorlabel_settings={},
-             elementlabel_settings={}, view=None, sensor_labels=False,
-             plot_states=['deformed','undeformed'], label_priority='deformed',
-             node_label_fun=None, element_label_fun=None, perspective_cam=False, background_plotter=True):
-
-
-        '''
-        Plot model (undeformed or deformed or both).
-
-        Arguments
-        ----------
-        pl : `pyvista.Plotter()` object, optional
-            plotter object - one will be created if not input
-        show : True, optional
-            whether or not to show plot at end - output is pl-object, which can be shown later
-        plot_lines : True, optional
-            whether or not to plot the line elements
-        plot_nodes : True, optional
-            whether or not to plot the nodes
-        node_labels : True, optional
-            whether or not to show node labels
-            if input is a list of node labels, only these are shown
-        element_labels :True, optional
-            whether or not to show element labels
-            if input is a list of element labels, only these are shown
-        plot_faces : True, optional
-            whether or not to plot face elements (triangles and rectangles)
-        canvas_settings : dict, optional
-            dictionary with additional settings for canvas
-        node_settings : dict, optional
-            dictionary with additional settings for undeformed nodes / points
-            given to `pyvista.Plotter().add_points`
-        deformed_node_settings : dict, optional
-            dictionary with additional settings for deformed nodes / points
-            given to `pyvista.Plotter().add_points`
-        line_settings : dict, optional
-            dictionary with additional settings for undeformed line elements
-            given to `pyvista.Plotter().add_mesh`
-        deformed_line_settings : dict, optional
-            dictionary with additional settings for deformed line elements
-            given to `pyvista.Plotter().add_mesh`
-        face_settings : dict, optional
-            dictionary with additional settings for undeformed patch elements
-            given to `pyvista.Plotter().add_mesh`
-        deformed_face_settings : dict, optional
-            dictionary with additional settings for deformed patch elements
-            given to `pyvista.Plotter().add_mesh`
-        nodelabel_settings : dict, optional
-            dictionary with additional settings for node labels
-            given to `pyvista.Plotter().add_point_labels`
-        sensorlabel_settings : dict, optional
-            dictionary with additional settings for sensor labels 
-            (=nodes with defined additional label)
-            given to `pyvista.Plotter().add_point_labels`
-        elementlabel_settings : dict, optional
-            dictionary with additional settings for element labels
-            given to `pyvista.Plotter().add_point_labels`
-        view : {None, 'xy', 'yx', 'xz', 'top', 'side', 'front'}, optional
-            string defining view, if None standard isometric perspective plot is given
-        sensor_labels : False, optional
-            whether or not to show sensor labels
-        plot_states : ['deformed', 'undeformed'], optional
-            which states of the system to plot
-        label_priority : str, optional 
-        node_label_fun : fun, optional
-            function to define what property from each node is given in the node label strings
-            if None, fun = lambda node: node.label
-        element_label_fun : fun, optional
-            function to define what property from each element is given in the element label strings
-            if None, fun = lambda el: el.label
-        perspective_cam : False, optional
-            whether or not to use perspective projection (parallel projection otherwise)
-        background_plotter : True, optional
-            whether or not to plot in background 
-            (meaning that Python processes in terminal can run while plot is open) 
-            if True, pyvistaqt is used to generate plot (different interface)
-     
-        Returns
-        ----------
-        pl : `pyvista.Plotter()` object
-        
-        Example
-        ---------
-        See separate notebook on GitHub for example.
-
-        '''
-
-        if node_label_fun is None:
-            node_label_fun = lambda n: str(int(n.label))
-        if element_label_fun is None:
-            element_label_fun = lambda e: str(int(e.label))
-
-        canvas_settings = dict(background_color='white') | canvas_settings
-
-        if 'deformed' in plot_states:
-            add_transparency = dict(opacity=0.4)
-        else:
-            add_transparency = {}
-
-        # Element label settings
-        elementlabel_settings = dict(always_visible=True, 
-                                      text_color='blue', 
-                                      shape_color='white', 
-                                      shape_opacity=0.2) | elementlabel_settings
-
-        # Node and sensor label settings
-        nodelabel_settings = dict(always_visible=True, shape_opacity=0.2)
-        sensorlabel_settings = nodelabel_settings | sensorlabel_settings
-
-        # Node plotting settings
-        node_settings = dict(
-                            render_points_as_spheres=True,
-                            color='black',
-                            lighting=True,
-                            point_size=6) | add_transparency | node_settings  
-        deformed_node_settings = node_settings | deformed_node_settings
-        
-        # Line plotting settings
-        line_settings = dict(render_lines_as_tubes=True,
-                                style='wireframe',
-                                lighting=True,
-                                line_width=4) | add_transparency | line_settings
-        
-        deformed_line_settings = line_settings | dict(color='#ee8899') | deformed_line_settings
-
-        # Face plotting settings
-        face_settings = dict() | add_transparency | face_settings
-        deformed_face_settings = face_settings | dict(color='#ee8899') | deformed_face_settings
-
-
-        if plot_nodes is not False:
-            if plot_nodes is True:
-                nodes_to_plot = self.nodes*1
-            else:
-                nodes_to_plot = [node for node in self.nodes if node in plot_nodes]
-
-        if pl is None:
-            if background_plotter:
-                pl = pvqt.BackgroundPlotter()
-            else:
-                pl = pv.Plotter()
-
-        if node_labels is not False:
-            if node_labels is not True:
-                labeled_nodes = [node for node in self.nodes if node in node_labels]
-            else:
-                labeled_nodes = self.nodes
-
-            lbl = [node_label_fun(node) for node in labeled_nodes]
-            
-            if 'deformed' in plot_states and (label_priority!='undeformed' or 'undeformed' not in plot_states):
-                pl.add_point_labels(self.get_points(nodes=labeled_nodes, deformed=False, flattened=False), lbl, **nodelabel_settings)
-            if 'undeformed' in plot_states and (label_priority!='deformed' or 'deformed' not in plot_states):
-                pl.add_point_labels(self.get_points(nodes=labeled_nodes, deformed=True, flattened=False), lbl, **nodelabel_settings)            
-
-        if element_labels is not False:
-            if element_labels is not True:
-                labeled_els = [el for el in self.elements if el in element_labels]
-            else:
-                labeled_els = self.elements
-
-            lbl = [node_label_fun(el) for el in labeled_els]
-            
-            if 'deformed' in plot_states and (label_priority!='undeformed' or 'undeformed' not in plot_states):
-                pl.add_point_labels(self.get_element_cogs(elements=labeled_els, deformed=False, flattened=False), lbl, **elementlabel_settings)
-            if 'undeformed' in plot_states and (label_priority!='deformed' or 'deformed' not in plot_states):
-                pl.add_point_labels(self.get_element_cogs(elements=labeled_els, deformed=True, flattened=False), lbl, **elementlabel_settings)            
-                    
-        if sensor_labels:
-            for sensor in self.sensors:
-                node = self.get_node(self.sensors[sensor])
-                if 'undeformed' in plot_states and (label_priority!='deformed' or 'deformed' not in plot_states):
-                    pl.add_point_labels(np.array([node.xyz0]), [sensor], **sensorlabel_settings)     
-                if 'deformed' in plot_states and (label_priority!='undeformed' or 'undeformed' not in plot_states):
-                    pl.add_point_labels(np.array([node.xyz]), [sensor], **sensorlabel_settings)     
-                    
-
-        if plot_lines:
-            if 'undeformed' in plot_states:
-                lines = self.get_lines()
-                mesh = pv.PolyData(self.get_points(), 
-                            lines=lines)        
-                pl.add_mesh(mesh, **line_settings)
-            if 'deformed' in plot_states:
-                lines = self.get_lines()
-                mesh = pv.PolyData(self.get_points(deformed=True), 
-                            lines=lines)        
-                pl.add_mesh(mesh, **deformed_line_settings)
-
-        if plot_faces:
-            if 'undeformed' in plot_states:
-                faces = self.get_faces()
-                mesh = pv.PolyData(self.get_points(),
-                            faces=faces)
-            
-                pl.add_mesh(mesh, **face_settings)
-            if 'deformed' in plot_states: 
-                faces = self.get_faces()
-                mesh = pv.PolyData(self.get_points(deformed=True),
-                            faces=faces)
-            
-                pl.add_mesh(mesh, **deformed_face_settings)
-
-        if view is not None:
-            if view in ['xy', 'top']:
-                pl.view_xy()
-            if view in ['yz', 'front']:
-                pl.view_yz()
-            if view in ['xz', 'side']:
-                pl.view_xz()
-
-        if plot_nodes:
-            if 'undeformed' in plot_states:
-                pl.add_points(self.get_points(nodes=nodes_to_plot, deformed=False, flattened=False), **node_settings)
-            if 'deformed' in plot_states:
-                pl.add_points(self.get_points(nodes=nodes_to_plot, deformed=True, flattened=False), **deformed_node_settings)
-
-        for key in canvas_settings:
-            setattr(pl, key, canvas_settings[key])
-
-        pl.camera.SetParallelProjection(not perspective_cam)
-   
-        if show:
-            pl.show()
-
-        return pl
-
     
-    def animate_mode(self, phi, filename=None, pl=None, add_undeformed=False, undeformed_settings={'opacity':0.2},
+    def animate_mode(self, phi, filename=None, pl=None, add_undeformed=False, 
+                     undeformed_settings={'opacity':0.2},
+                     node_settings={}, face_settings={}, line_settings={},
                      cycles=1, f=1.0, fps=60, **kwargs):
         
         '''
@@ -840,6 +608,15 @@ class Model:
             settings dict used for both lines, edges and nodes of undeformed structure
             keywords must be valid for all these object types (therefore limited flexibility)
             only applicable if `pl=None` and `add_undeformed=True`
+        node_settings : dict, optional
+            dictionary with additional settings for undeformed nodes / points
+            given to `pyvista.Plotter().add_points`
+        line_settings : dict, optional
+            dictionary with additional settings for undeformed line elements
+            given to `pyvista.Plotter().add_mesh`
+        face_settings : dict, optional
+            dictionary with additional settings for undeformed patch elements
+            given to `pyvista.Plotter().add_mesh`
         cycles : 1, optional
             number of cycles for stored file (not used for interactive mode)
         f : 1.0, optional
@@ -863,24 +640,25 @@ class Model:
             if pl is None:
                 if add_undeformed:
                     pl = self.plot(deformed=False, background_plotter=False, show=False, 
-                                        line_settings=undeformed_settings, node_settings=undeformed_settings,
-                                        face_settings=undeformed_settings, **kwargs)
+                                        line_settings=line_settings | undeformed_settings, node_settings=node_settings | undeformed_settings,
+                                        face_settings=face_settings | undeformed_settings)
                 else:
                     pl = pv.Plotter()
                     pl.background_color='white'
 
 
-            if filename.split('.')[1].lower()=='gif':
+            if filename.split('.')[-1].lower()=='gif':
                 pl.open_gif(filename, fps=fps)
             else:
                 pl.open_movie(filename)
 
-            pl = self.plot(pl=pl, deformed=True, **kwargs)
+            pl = self.plot(pl=pl, show=False, deformed=True, **kwargs)
+            pl.show(interactive_update=True)
             
             frames = cycles*frames_per_cycle
             dtheta = 2*np.pi * f/fps
             theta = 0.0
-
+            
             for frame in range(frames):
                 theta = theta+dtheta
                 self.u = np.real(phi * np.exp(theta*1j))
@@ -890,7 +668,7 @@ class Model:
                 self.point_mesh.points = pts
                 pl.update()
                 pl.write_frame()
-
+            
             pl.close()
 
         else:   # interactive animation           
@@ -918,10 +696,20 @@ class Model:
 
             self.step = 0
             pl.add_callback(update_shape, interval=0)  
-            pl.show()
+            pl.show(interactive_update=True)
             pl.app.exec_()
         
             sys.exit()
 
-
     
+
+def save_model(model, path):
+    import dill
+    with open(path, 'wb') as f:
+        dill.dump(model, f, -1)
+
+def load_model(path):
+    import dill
+    with open(path, 'rb') as f:
+        model = dill.load(f)
+    return model
