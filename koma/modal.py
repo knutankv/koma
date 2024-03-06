@@ -116,6 +116,27 @@ def mac(phi1, phi2):
     return mac_value
 
 
+def maxreal_vector(phi):
+    """
+    Rotate complex vector such that the absolute values of the real parts are maximized.
+
+    Arguments
+    ---------------------------
+    phi : double
+        complex-valued mode shape vector (column-wise stacked mode shapes)
+
+    Returns
+    ---------------------------
+    phi_max_real : boolean
+        complex-valued mode shape vector, with vector rotated to have maximum real parts
+    """   
+
+    angles = np.expand_dims(np.arange(0,np.pi/2, 0.01), axis=0)
+    rot_mode = np.dot(np.expand_dims(phi, axis=1), np.exp(angles*1j))
+    max_angle_ix = np.argmax(np.sum(np.real(rot_mode)**2))
+
+    return phi * np.exp(angles[0, max_angle_ix]*1j)*np.sign(sum(np.real(phi)))
+
 def maxreal(phi):
     """
     Rotate complex vectors (stacked column-wise) such that the absolute values of the real parts are maximized.

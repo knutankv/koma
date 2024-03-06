@@ -4,7 +4,9 @@ MODULE FOR SPATIAL MAPPING AND VISUALIZATION
 import pyvista as pv
 import pyvistaqt as pvqt
 import numpy as np
+from koma.modal import maxreal_vector
 import sys
+from scipy.interpolate import griddata
 
 from copy import deepcopy
 
@@ -97,11 +99,10 @@ class Node:
         self.y0 = y
         self.z0 = z
 
-        self.x = self.x0
-        self.y = self.y0
-        self.z = self.z0
-
-
+        # Initialize deformed
+        self.x = self.x0*1
+        self.y = self.y0*1
+        self.z = self.z0*1
         self._label = label
         
     @property
@@ -118,6 +119,10 @@ class Node:
     @property
     def xyz0(self):
         return np.array([self.x0, self.y0, self.z0])
+    
+    @property
+    def u(self):
+        return self.xyz-self.xyz0
 
     # CORE METHODS
     def __str__(self):
@@ -196,6 +201,23 @@ class Model:
     sensors : dict, optional
     u : None, optional
         displacements (with dimensions corresponding to index values provided in dofmap)
+    x_ixs : None, optional
+        indices of input model DOFs that correspond to global x
+        used to construct interpolation field for automatic extension of mode shapes
+        when None (standard value), 0::3 is used
+    y_ixs : None, optional
+        indices of input model DOFs that correspond to global x
+        used to construct interpolation field for automatic extension of mode shapes
+        when None (standard value), 1::3 is used
+    z_ixs : None, optional
+        indices of input model DOFs that correspond to global x
+        used to construct interpolation field for automatic extension of mode shapes
+        when None (standard value), 2::3 is used
+    undefined_dofs : {'zero', 'linear', 'quadratic'}, optional
+        how to treat undefined nodes (either set to zero or interpolate between DOFs present)  
+        interpolation (values other than 'zero') is experimental
+    interpolation_axes : [0,1,2], optional
+        axes used for interpolation
 
     Example
     ------------
@@ -226,16 +248,38 @@ class Model:
     A more comprehensive example is provided in the Examples folder on GitHub.
 
     '''
-    def __init__(self, nodes, elements, dofmap=None, sensors={}, u=None):
+    def __init__(self, nodes, elements, dofmap=None, sensors={}, 
+                 u=None, x_ixs=None, y_ixs=None, z_ixs=None, 
+                 undefined_dofs='zero', interpolation_axes=[0,1,2]):
+        
         self.nodes = nodes
         self.elements = elements
         self.dofmap = dofmap
         self.sensors = sensors
         self.u = u
-    
+
+        if x_ixs is None:
+            self.x_ixs = np.arange(0, len(self.nodes)*3, 3)
+        else:
+            self.x_ixs = x_ixs
+
+        if y_ixs is None:
+            self.y_ixs = np.arange(1, len(self.nodes)*3, 3)
+        else:
+            self.y_ixs = y_ixs
+
+        if z_ixs is None:
+            self.z_ixs = np.arange(2, len(self.nodes)*3, 3)
+        else:
+            self.z_ixs = z_ixs
+
+        self.interpolation_axes = np.array(interpolation_axes)
+
         # Ensure node objects and not labels
         for el in self.elements:
             el.nodes = [self.get_node(n) for n in el.nodes] 
+        
+        self.undefined_dofs = undefined_dofs
 
     @property 
     def u(self):
@@ -243,9 +287,13 @@ class Model:
     
     @u.setter
     def u(self, val):
-        ufull = self.expand_field(val)
-        self.deform(ufull)
+        self.ufull = self.expand_field(val)
+        self.deform(np.real(self.ufull))
         self._u = val
+
+    def rotate_phase(self, angle):
+        self.ufull = self.ufull*np.exp(1j*angle)
+        self.deform(np.real(self.ufull))
     
     def deform(self, ufull):
         '''
@@ -255,6 +303,7 @@ class Model:
         for node in self.nodes:
             dxyz = ufull[self.get_node_ixs(node)]
             node.x, node.y, node.z = dxyz[0]+node.x0, dxyz[1]+node.y0, dxyz[2]+node.z0
+
 
     def expand_field(self, u):
         '''
@@ -271,7 +320,10 @@ class Model:
         ufull : float
             displacements corresponding to full field
         '''
-        ufull = np.zeros(len(self.nodes)*3)
+        if u is None:
+            return np.zeros(len(self.nodes)*3)
+
+        ufull = np.zeros(len(self.nodes)*3).astype(complex)*np.nan
 
         if u is not None:
             # First, assign all direct (if not given - stays zero)
@@ -280,7 +332,9 @@ class Model:
                 for dof_ix, rel in enumerate(rels):
                     if type(rel) == int:
                         global_ix = self.get_node_ixs(node)[dof_ix]
-                        if rel is not None:
+                        if rel is None:
+                            ufull[global_ix] = np.nan
+                        else:
                             ufull[global_ix] = u[rel]
 
             # Second, assign all relative
@@ -292,8 +346,45 @@ class Model:
                         global_ix = self.get_node_ixs(node)[dof_ix]
                         ufull[global_ix] = rel.fun(n)
 
+        
+        if self.undefined_dofs != 'zero':
+            ufull[self.x_ixs] = self.fill_from_interpolation(self.x_ixs, 
+                                                                ufull[self.x_ixs],
+                                                                method=self.undefined_dofs)
+            
+            ufull[self.y_ixs]  = self.fill_from_interpolation(self.y_ixs, 
+                                                                ufull[self.y_ixs], 
+                                                                method=self.undefined_dofs)
+            
+            ufull[self.z_ixs]  = self.fill_from_interpolation(self.z_ixs, 
+                                                                ufull[self.z_ixs],
+                                                                method=self.undefined_dofs)
+
+        ufull[np.isnan(ufull)] = 0.0
+
         return ufull
 
+    def fill_from_interpolation(self, ixs, u, method='linear'):
+        source_nodes = self.get_nodes_with_dofs(ixs[~np.isnan(u)])
+        target_nodes = self.get_nodes_with_dofs(ixs[np.isnan(u)])
+
+        if len(source_nodes)>1:
+            source_xyz = np.vstack([node.xyz0 for node in source_nodes])[:, self.interpolation_axes]
+            source_u = np.array(u[~np.isnan(u)])
+            target_xyz = np.vstack([node.xyz0 for node in target_nodes])[:, self.interpolation_axes]
+            target_u = griddata(source_xyz, source_u, target_xyz, method=method, fill_value=0).flatten()
+    
+            u[np.isnan(u)] = target_u
+            
+        return u
+
+
+    def get_nodes_with_dofs(self, ixs):
+        '''
+        Establish list of nodes conatining given DOF indices (all nodes have 3 DOFs).
+        '''
+
+        return [self.nodes[int(ix)] for ix in np.floor(ixs/3)]
 
     def grab_fun(self, ufull):
         def n(node, dof):
@@ -337,9 +428,9 @@ class Model:
         nodes = self.get_nodes(nodes)
         
         if deformed:
-            out = [n.xyz for n in self.nodes]
+            out = [n.xyz for n in nodes]
         else:
-            out = [n.xyz0 for n in self.nodes]
+            out = [n.xyz0 for n in nodes]
         
         if flattened:
             return np.hstack(out)
@@ -387,13 +478,13 @@ class Model:
         return len(self.get_elements(filter_elements=['rectangle', 'triangle']))
 
     def plot(self, pl=None, show=True, plot_lines=True, plot_nodes=True, 
+                plot_sensor_nodes=True, 
                 node_labels=False, element_labels=False,
                 plot_faces=True, canvas_settings={}, 
                 node_settings={}, line_settings={}, 
                 face_settings={}, nodelabel_settings={}, sensorlabel_settings={},
-                elementlabel_settings={}, view=None, sensor_labels=False,
-                deformed=True, 
-                node_label_fun=None, element_label_fun=None, perspective_cam=False, background_plotter=True):
+                sensor_node_settings={'color':'red', 'point_size': 8}, elementlabel_settings={}, view=None, sensor_labels=False,
+                deformed=True, node_label_fun=None, element_label_fun=None, perspective_cam=False, background_plotter=True):
 
 
         '''
@@ -444,6 +535,10 @@ class Model:
             whether or not to show sensor labels
         plot_states : ['deformed', 'undeformed'], optional
             which states of the system to plot
+        plot_sensor_nodes : True, optional
+            whether or not to plot sensors
+        sensor_node_settings : dict, optional
+            overriding settings dict on sensor nodes
         label_priority : str, optional 
         node_label_fun : fun, optional
             function to define what property from each node is given in the node label strings
@@ -488,7 +583,9 @@ class Model:
                             render_points_as_spheres=True,
                             color='black',
                             lighting=True,
-                            point_size=6) | node_settings  
+                            point_size=6) | node_settings 
+         
+        sensor_node_settings = dict(node_settings) | sensor_node_settings
 
         # Line plotting settings
         line_settings = dict(render_lines_as_tubes=True,
@@ -501,11 +598,14 @@ class Model:
         # Face plotting settings
         face_settings = dict(show_edges=True, color='lightgray') | face_settings
 
-        if plot_nodes is not False:
-            if plot_nodes is True:
-                nodes_to_plot = self.nodes*1
-            else:
-                nodes_to_plot = [node for node in self.nodes if node in plot_nodes]
+        if plot_nodes is True:
+            nodes_to_plot = self.nodes*1
+        elif plot_nodes is False and sensor_node_settings != node_settings and hasattr(self, 'sensors'):
+            nodes_to_plot = self.get_nodes(np.array(self.sensors.values()))
+        elif plot_nodes is False:
+            nodes_to_plot = []
+        else:
+            nodes_to_plot = [node for node in self.nodes if node in plot_nodes]
 
         if pl is None:
             if background_plotter:
@@ -558,7 +658,7 @@ class Model:
             lines = self.get_lines()
             self.line_mesh = pv.PolyData(points, 
                         lines=lines)        
-            pl.add_mesh( self.line_mesh, **line_settings)
+            pl.add_mesh(self.line_mesh, **line_settings)
 
         if plot_faces:
             faces = self.get_faces()
@@ -573,6 +673,14 @@ class Model:
                                                         flattened=False))
             pts = pl.add_points(node_points, **node_settings)
             self.point_mesh = pts.mapper.dataset
+
+        # Sensor nodes
+        if plot_sensor_nodes and len(self.sensors)>0:
+            sensor_node_points = pv.pyvista_ndarray(self.get_points(nodes=self.sensors.values(), 
+                                                        deformed=deformed, 
+                                                        flattened=False))
+            sensor_pts = pl.add_points(sensor_node_points, **sensor_node_settings)
+            self.sensor_point_mesh = sensor_pts.mapper.dataset
         
         pl.camera.SetParallelProjection(not perspective_cam)
 
@@ -586,7 +694,7 @@ class Model:
     def animate_mode(self, phi, filename=None, pl=None, add_undeformed=False, 
                      undeformed_settings={'opacity':0.2},
                      node_settings={}, face_settings={}, line_settings={},
-                     cycles=1, f=1.0, fps=60, **kwargs):
+                     cycles=1, f=1.0, fps=60, ensure_exact_cycle=True, **kwargs):
         
         '''
         Plot model (either undeformed or deformed).
@@ -623,6 +731,8 @@ class Model:
             frequency of rotation for stored file (not used for interactive mode)
         fps : 60, optional
             frames per second used for stored file (not used for interactive mode)
+        ensure_exact_cycle : True, optional
+            ensure that fps is such that 0 and 0+T both are exactly sampled/shown
         **kwargs
             arguments supported by `spatial.plot` are passed to that method
         
@@ -632,11 +742,32 @@ class Model:
 
         '''
         
+        # Ensure repeating pattern
+        if ensure_exact_cycle:
+            fps = np.ceil(fps/f) * f
+
         frames_per_cycle = int(np.round(fps/f))
+        self.u = maxreal_vector(phi)
+        self.dt = 1/fps
+        self.dangle = self.dt * f * np.pi * 2.0
+
+        # Update function
+        def update_shape():
+            self.rotate_phase(self.dangle)
+            pts = pv.pyvista_ndarray(self.get_points(deformed=True, flattened=False))
+            self.face_mesh.points = pts
+            self.line_mesh.points = pts
+            self.point_mesh.points = pts
+
+            if hasattr(self, 'sensor_point_mesh'):
+                pts_sensors = pv.pyvista_ndarray(self.get_points(nodes=self.sensors.values(), 
+                                                                 deformed=True, flattened=False))
+                self.sensor_point_mesh.points = pts_sensors
+
+            pl.update()
 
         # Save video
         if filename is not None:
-
             if pl is None:
                 if add_undeformed:
                     pl = self.plot(deformed=False, background_plotter=False, show=False, 
@@ -646,7 +777,6 @@ class Model:
                     pl = pv.Plotter()
                     pl.background_color='white'
 
-
             if filename.split('.')[-1].lower()=='gif':
                 pl.open_gif(filename, fps=fps)
             else:
@@ -654,34 +784,15 @@ class Model:
 
             pl = self.plot(pl=pl, show=False, deformed=True, **kwargs)
             pl.show(interactive_update=True)
-            
             frames = cycles*frames_per_cycle
-            dtheta = 2*np.pi * f/fps
-            theta = 0.0
             
             for frame in range(frames):
-                theta = theta+dtheta
-                self.u = np.real(phi * np.exp(theta*1j))
-                pts = pv.pyvista_ndarray(self.get_points(deformed=True, flattened=False))
-                self.face_mesh.points = pts
-                self.line_mesh.points = pts
-                self.point_mesh.points = pts
-                pl.update()
+                update_shape()
                 pl.write_frame()
             
             pl.close()
 
-        else:   # interactive animation           
-            # Initial deformed plot
-
-            def update_shape():
-                self.step += 1
-                self.u = np.real(phi * np.exp(2*np.pi*1j*(self.step/frames_per_cycle)))
-                pts = pv.pyvista_ndarray(self.get_points(deformed=True, flattened=False))
-                self.face_mesh.points = pts
-                self.line_mesh.points = pts
-                self.point_mesh.points = pts
-                pl.update()
+        else:   # Interactive animation           
 
             if pl is None:
                 if add_undeformed:
@@ -693,10 +804,10 @@ class Model:
                     pl.background_color='white'
 
             pl = self.plot(pl=pl, deformed=True, **kwargs)
-
-            self.step = 0
-            pl.add_callback(update_shape, interval=0)  
-            pl.show(interactive_update=True)
+            self.dt = 1/fps
+            self.dangle = self.dt * f * np.pi * 2.0
+            pl.add_callback(update_shape, interval=int(np.ceil(self.dt*1000)))  
+            pl.show()
             pl.app.exec_()
         
             sys.exit()
