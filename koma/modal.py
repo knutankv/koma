@@ -295,12 +295,13 @@ def mpc(phi):
         Syy = np.dot(np.imag(phin), np.imag(phin))
         Sxy = np.dot(np.real(phin), np.imag(phin))
 
-        eta = (Syy-Sxx)/(2*Sxy)
-
-        lambda1 = (Sxx+Syy)/2 + Sxy*np.sqrt(eta**2+1)
-        lambda2 = (Sxx+Syy)/2 - Sxy*np.sqrt(eta**2+1)
-
-        mpc_val[mode] = ((lambda1-lambda2)/(lambda1+lambda2))**2
+        if Sxy != 0.0:
+            eta = (Syy-Sxx)/(2*Sxy)
+            lambda1 = (Sxx+Syy)/2 + Sxy*np.sqrt(eta**2+1)
+            lambda2 = (Sxx+Syy)/2 - Sxy*np.sqrt(eta**2+1)
+            mpc_val[mode] = ((lambda1-lambda2)/(lambda1+lambda2))**2
+        else:
+            mpc_val[mode] = 1.0
 
     mpc_val = np.array(mpc_val)
     return mpc_val
