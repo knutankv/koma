@@ -1,5 +1,8 @@
 from scipy.signal import csd
 import numpy as np
+from scipy.signal import correlate, correlation_lags
+from scipy.signal import resample_poly
+from scipy.interpolate import interp1d
 
 def xwelch(x, **kwargs):
     '''
@@ -28,3 +31,84 @@ def xwelch(x, **kwargs):
             f, cpsd[i,j,:] = csd(xi, xj, **kwargs)
 
     return f, cpsd
+
+
+def estimate_lags(data, ref=0,  upsample=None, fs=1.0):
+    '''
+    Compute lags between all channels of data (channels stacked column-wise),
+    based on max of correlation.
+
+    Arguments
+    -----------
+    data : float
+        data matrix (column-wise data)
+    ref : int, default=0
+        reference channel (to define resulting lags, will not affect analysis itself)
+
+    upsample : int, optional
+        upsample factor; if not specified the lag will be restricted to a resolution
+        given by the original sampling factor
+    fs : float, default=1.0
+        sampling factor of data; if not given
+
+    Returns
+    -----------
+    lags : float
+        numpy 1d array with lags between all channels and reference channel;
+        if fs is not given (i.e. set to its default value of 1.0), 
+        the output defines the sample lag
+    
+    '''   
+    if upsample is not None:
+        fs_us = upsample*1
+        data = resample_poly(data, upsample, 1.0)
+    else:
+        fs_us = 1.0
+    
+    l = np.shape(data)[1]        
+    R0 = np.zeros([l, l, 2*data.shape[0]-1])
+    
+    for dof1 in range(0, l):
+        for dof2 in range(0, l):
+            R0[dof1, dof2, :] = correlate(data[:, dof2], data[:,dof1], mode='full', method='auto')
+   
+    lag_length = correlation_lags(data[:, dof1].size, data[:, dof2].size, mode="full")   
+    lags = lag_length[np.argmax(R0[ref, :, :], axis=-1)]
+    
+    return lags/(fs_us*fs)
+
+
+def shift_data(data, lags, cut=True):
+    '''
+    Shift data by specified lags.
+
+    Arguments
+    -----------
+    data : float
+        data matrix (column-wise data)
+    lags : float
+        list or numpy 1d array with sample lags (not time lag) to apply to all channels
+    cut : boolean, default=True
+        whether or not to cut the data to common valid range; if not,
+        nans are used
+
+    Returns
+    -----------
+    data_shifted : float
+        shifted data matrix
+    '''
+    data_shifted = data*np.nan
+    for ix, lag in enumerate(lags):
+        x = np.arange(0, data.shape[0], 1.0)
+        data_shifted[:, ix] = interp1d(x, data[:, ix], axis=0, bounds_error=False)(x+lag)
+        
+    if cut:
+        nan_start = int(np.ceil(np.max([0,-np.min(lags)])))
+        nan_end = int(-np.ceil(np.max(lags)))
+        
+        if nan_end == 0:
+            nan_end = None 
+        
+        data_shifted = data_shifted[nan_start:nan_end, :]
+        
+    return data_shifted
