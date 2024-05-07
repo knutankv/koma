@@ -131,7 +131,7 @@ def maxreal_vector(phi):
         complex-valued mode shape vector, with vector rotated to have maximum real parts
     """   
 
-    angles = np.expand_dims(np.arange(0,np.pi/2, 0.01), axis=0)
+    angles = np.expand_dims(np.arange(0, np.pi, 0.01), axis=0)
     rot_mode = np.dot(np.expand_dims(phi, axis=1), np.exp(angles*1j))
     max_angle_ix = np.argmax(np.sum(np.real(rot_mode)**2))
 
@@ -152,7 +152,7 @@ def maxreal(phi):
         complex-valued modal transformation matrix, with vectors rotated to have maximum real parts
     """   
 
-    angles = np.expand_dims(np.arange(0,np.pi/2, 0.01), axis=0)
+    angles = np.expand_dims(np.arange(0, np.pi, 0.01), axis=0)
     phi_max_real = np.zeros(np.shape(phi)).astype('complex')
     for mode in range(0,np.shape(phi)[1]):
         rot_mode = np.dot(np.expand_dims(phi[:, mode], axis=1), np.exp(angles*1j))
@@ -164,7 +164,7 @@ def maxreal(phi):
 
 
 def maxreal_alt(phi, preserve_conjugates=False):
-    angles = np.expand_dims(np.arange(0,np.pi/2, 0.01), axis=0)
+    angles = np.expand_dims(np.arange(0, np.pi, 0.01), axis=0)
     
     if phi.ndim==1:
         phi = np.array([phi]).T
@@ -295,12 +295,13 @@ def mpc(phi):
         Syy = np.dot(np.imag(phin), np.imag(phin))
         Sxy = np.dot(np.real(phin), np.imag(phin))
 
-        eta = (Syy-Sxx)/(2*Sxy)
-
-        lambda1 = (Sxx+Syy)/2 + Sxy*np.sqrt(eta**2+1)
-        lambda2 = (Sxx+Syy)/2 - Sxy*np.sqrt(eta**2+1)
-
-        mpc_val[mode] = ((lambda1-lambda2)/(lambda1+lambda2))**2
+        if Sxy != 0.0:
+            eta = (Syy-Sxx)/(2*Sxy)
+            lambda1 = (Sxx+Syy)/2 + Sxy*np.sqrt(eta**2+1)
+            lambda2 = (Sxx+Syy)/2 - Sxy*np.sqrt(eta**2+1)
+            mpc_val[mode] = ((lambda1-lambda2)/(lambda1+lambda2))**2
+        else:
+            mpc_val[mode] = 1.0
 
     mpc_val = np.array(mpc_val)
     return mpc_val

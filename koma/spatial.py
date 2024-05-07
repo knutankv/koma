@@ -755,10 +755,17 @@ class Model:
         def update_shape():
             self.rotate_phase(self.dangle)
             pts = pv.pyvista_ndarray(self.get_points(deformed=True, flattened=False))
-            self.face_mesh.points = pts
-            self.line_mesh.points = pts
-            self.point_mesh.points = pts
+            
+            if hasattr(self, 'face_mesh'):
+                 self.face_mesh.points = pts
+           
+            if hasattr(self, 'line_mesh'):
+                self.line_mesh.points = pts
 
+            if hasattr(self, 'point_mesh'):
+                self.point_mesh.points = pts
+
+            
             if hasattr(self, 'sensor_point_mesh'):
                 pts_sensors = pv.pyvista_ndarray(self.get_points(nodes=self.sensors.values(), 
                                                                  deformed=True, flattened=False))

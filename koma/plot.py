@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
 from matplotlib.backend_bases import MouseButton
+from matplotlib import cm
 
 class FDDPlotter:
     def __init__(self, U, D, f=None, lines=None, colors=None, ax=None, 
@@ -391,3 +392,32 @@ def listify_each_dict_entry(dict_in, n):
         dict_out[key] = [dict_in[key]]*n
         
     return dict_out
+
+
+def plot_argand(phi, ax=None, colors=None, **plot_settings):
+    if ax is None:
+        ax = plt.gca()
+    
+    plot_settings = {'width': 0.0, 'linestyle': '-'} | plot_settings
+    
+    if type(colors) == str:
+        colors = cm.get_cmap(colors, len(phi))
+        if hasattr(colors, 'colors'):
+            colors = colors.colors
+
+    for ix,val in enumerate(phi):
+        if colors is not None:
+            color = colors[ix]
+        else:
+            color = None
+            
+        ax.arrow(0, 0, np.real(val), np.imag(val), color=color, label=ix, **plot_settings)
+    
+    ymax = np.max(np.abs(ax.get_ylim()))
+    xmax = np.max(np.abs(ax.get_xlim()))
+    
+    ax.set_ylim([-ymax, ymax])
+    ax.set_xlim([-xmax, xmax])
+    return ax
+
+    
