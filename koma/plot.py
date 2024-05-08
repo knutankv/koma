@@ -394,9 +394,12 @@ def listify_each_dict_entry(dict_in, n):
     return dict_out
 
 
-def plot_argand(phi, ax=None, colors=None, **plot_settings):
+def plot_argand(phi, ax=None, colors=None, labels=None, **plot_settings):
     if ax is None:
         ax = plt.gca()
+        
+    if labels is None:
+        labels = np.arange(len(phi))
     
     plot_settings = {'width': 0.0, 'linestyle': '-'} | plot_settings
     
@@ -410,14 +413,16 @@ def plot_argand(phi, ax=None, colors=None, **plot_settings):
             color = colors[ix]
         else:
             color = None
-            
-        ax.arrow(0, 0, np.real(val), np.imag(val), color=color, label=ix, **plot_settings)
+        
+        ax.arrow(0, 0, np.real(val), np.imag(val), color=color, label=labels[ix], **plot_settings)
     
     ymax = np.max(np.abs(ax.get_ylim()))
     xmax = np.max(np.abs(ax.get_xlim()))
     
-    ax.set_ylim([-ymax, ymax])
-    ax.set_xlim([-xmax, xmax])
+    xymax = np.max([ymax,xmax])
+    
+    ax.set_ylim([-xymax, xymax])
+    ax.set_xlim([-xymax, xymax])
     return ax
 
     
