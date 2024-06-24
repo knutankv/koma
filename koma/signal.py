@@ -1,7 +1,7 @@
 from scipy.signal import csd
 import numpy as np
 from scipy.signal import correlate, correlation_lags
-from scipy.signal import resample_poly
+from scipy.signal import resample_poly, resample
 from scipy.interpolate import interp1d
 
 def xwelch(x, **kwargs):
@@ -33,7 +33,7 @@ def xwelch(x, **kwargs):
     return f, cpsd
 
 
-def estimate_lags(data, ref=0,  upsample=None, fs=1.0):
+def estimate_lags(data, ref=0, upsample=None, fs=1.0, upsample_method='fourier'):
     '''
     Compute lags between all channels of data (channels stacked column-wise),
     based on max of correlation.
@@ -50,6 +50,8 @@ def estimate_lags(data, ref=0,  upsample=None, fs=1.0):
         given by the original sampling factor
     fs : float, default=1.0
         sampling factor of data; if not given
+    upsample_method : str, default='fourier'
+        method used to conduct the upsampling {'fourier', 'linear', 'poly'}
 
     Returns
     -----------
@@ -60,10 +62,17 @@ def estimate_lags(data, ref=0,  upsample=None, fs=1.0):
     
     '''   
     if upsample is not None:
-        fs_us = upsample*1
-        data = resample_poly(data, upsample, 1.0)
+        if upsample_method == 'fourier':
+            data = resample_poly(data, upsample, 1.0)
+        elif upsample_method == 'linear':
+            t = np.arange(0, (data.shape[0])*1/fs, 1/fs)
+            fsi = fs*upsample
+            ti = np.arange(0, (data.shape[0])*upsample*1/fsi, 1/fsi)
+            data = interp1d(t, data, axis=0, fill_value='extrapolate')(ti)
+        elif upsample_method == 'poly':
+            data = resample(data, upsample)
     else:
-        fs_us = 1.0
+        upsample = 1.0
     
     l = np.shape(data)[1]        
     R0 = np.zeros([l, l, 2*data.shape[0]-1])
@@ -75,7 +84,7 @@ def estimate_lags(data, ref=0,  upsample=None, fs=1.0):
     lag_length = correlation_lags(data[:, dof1].size, data[:, dof2].size, mode="full")   
     lags = lag_length[np.argmax(R0[ref, :, :], axis=-1)]
     
-    return lags/(fs_us*fs)
+    return lags/(upsample*fs)
 
 
 def shift_data(data, lags, cut=True):
