@@ -103,7 +103,7 @@ class Node:
         self.x = self.x0*1
         self.y = self.y0*1
         self.z = self.z0*1
-        self._label = label
+        self._label = int(label)
         
     @property
     def label(self):
@@ -330,12 +330,13 @@ class Model:
             for node in self.dofmap:
                 rels = self.dofmap[node]
                 for dof_ix, rel in enumerate(rels):
-                    if type(rel) == int:
+                    if type(rel) in [int, float, np.int32]:
                         global_ix = self.get_node_ixs(node)[dof_ix]
                         if rel is None:
                             ufull[global_ix] = np.nan
                         else:
                             ufull[global_ix] = u[rel]
+                        
 
             # Second, assign all relative
             n = self.grab_fun(ufull)
