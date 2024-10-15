@@ -8,10 +8,10 @@ KOMA is a package for operational modal analysis in Python. For additional detai
 
 Installation 
 ========================
-Either download the repository to your computer and install, e.g. by **pip**
+Either install via PyPI as follows:
 
 ```
-pip install .
+pip install pykoma
 ```
 
 or install directly from github:
