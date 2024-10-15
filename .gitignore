@@ -7,6 +7,6 @@ _templates
 _dev
 build
 .ipynb_checkpoints
-koma_knutankv.egg-info
+koma.egg-info
 _dev
 .ipynb_checkpoints
