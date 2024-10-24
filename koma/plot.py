@@ -45,9 +45,9 @@ class StabPlotter:
     '''
     
     def __init__(self, lambd, orders, phi=None, freq_unit='rad/s', 
-                damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', 
+                damped_freq=False, psd_freq=None, psd_y=None, log_psd_scale=True, 
                 pole_settings=None, selected_pole_settings=None, hover_pole_settings=None, ax=None, num=None, 
-                sort_by='undamped', annotate_hover=False):
+                sort_by='undamped', annotate_hover=False, psd_color='gray'):
            
         '''
         Parameters
@@ -64,11 +64,11 @@ class StabPlotter:
         damped_freq : False, optional
             whether or not to use damped frequency (or period) values in plot (False enforces undamped freqs)
         psd_freq : double, optional
-            [not yet implemented] frequency values of plot to overlay, typically spectrum of data
+            frequency values of plot to overlay, typically spectrum of data
         psd_y : double, optional
-            [not yet implemented] function values of plot to overlay, typically spectrum of data
-        psd_plot_scale: {'log', 'linear'}, optional
-            [not yet implemented] how to plot the overlaid PSD (linear or logarithmic y-scale)
+            function values of plot to overlay, typically spectrum of data
+        log_psd_scale: boolean, default=True
+            whether or not to plot the overlaid PSD using a logarithmic y-scale
         pole_settings : dict
             dictionary with settings to pass to the plot settings of the poles
         selected_pole_settings : dict
@@ -83,6 +83,8 @@ class StabPlotter:
             figure number used; only used if `ax` = None
         sort_by : str, default='undamped'
             what quantity to sort output by; either 'undamped', 'damped' or None
+        psd_color : str, default='gray'
+            color to use for PSD plot overlayed
 
         Returns
         ---------------------------
@@ -105,9 +107,11 @@ class StabPlotter:
         if psd_y is not None and not isinstance(psd_y, list):
             psd_y = [psd_y]
             psd_freq = [psd_freq]
-            
+        
+        self.psd_color = psd_color
         self.psd_freq = psd_freq
         self.psd_y = psd_y
+        self.log_psd_scale = log_psd_scale
         
         self.pole_settings = dict(linestyle='none', marker='.', color='k') | pole_settings
         self.selected_pole_settings = dict(linestyle='none', marker='o', color='r') | selected_pole_settings
@@ -190,6 +194,18 @@ class StabPlotter:
 
         return np.array(self._picked)[ix]
     
+    @property
+    def ix(self):   #alias
+        return self.picked
+
+    # Picked orders
+    @property
+    def n_picked(self):
+        if len(self.picked)>0:
+            return self._orders[self.picked]
+        else:
+            return np.empty([0])
+
     # Eigenvalues and eigenvectors
     @property
     def lambd(self):
@@ -240,6 +256,25 @@ class StabPlotter:
         xi = -np.real(self._lambd[ix])/np.abs(self._lambd[ix])
         return xi
 
+    def get_df(self, pars=['ix', 'n_picked', 'wn', 'xi']):
+        '''
+        Get pandas dataframe with results.
+        '''
+        
+        df = pd.DataFrame(data=np.vstack([getattr(self, par) for par in pars]).T, 
+        columns=pars)
+
+        if 'n_picked' in df:
+            df['n_picked'] = df['n_picked'].astype(int)
+        
+        if 'picked' in df:
+            df['picked'] = df['picked'].astype(int)
+
+        if 'ix' in df:
+            df['ix'] = df['ix'].astype(int)
+
+        return df
+
     
     def get_ix(self, event):
         dist = (event.xdata - self._f)**2 + (event.ydata-self._orders)**2
@@ -248,12 +283,19 @@ class StabPlotter:
     
 
     def get_fig(self, show=True, block=True):
+        if self.psd_y is not None:
+            ax2 = self.ax.twinx()
+            for ix, (psd, fi) in enumerate(zip(self.psd_y, self.psd_freq)):
+                ax2.plot(fi, psd, self.psd_color)
+
+            if self.log_psd_scale:
+                ax2.set_yscale('log')
 
         self.ax.plot(self._f, self._orders, **self.pole_settings)
         self.ax.set_xlabel(f'{self.freq_name} [{self.freq_unit}]')
         self.ax.set_ylabel('Order, $n$')
         self._hoverdot = self.ax.plot([np.nan], [np.nan], **self.hover_pole_settings)[0]
-        
+
         if self.annotate_hover:
             offsetbox = TextArea('')
             self._annotation = AnnotationBbox(offsetbox, [np.nan, np.nan],
@@ -265,6 +307,8 @@ class StabPlotter:
             
             self.ax.add_artist(self._annotation)
 
+        self.ax.set_zorder(ax2.get_zorder() + 1)
+        self.ax.patch.set_visible(False)
 
         self.fig.canvas.mpl_connect('button_press_event', self.on_click)   
         self.fig.canvas.mpl_connect('motion_notify_event', self.on_move)
