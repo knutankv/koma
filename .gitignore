@@ -7,6 +7,6 @@ _templates
 _dev
 build
 .ipynb_checkpoints
-koma.egg-info
+pykoma.egg-info
 _dev
-.ipynb_checkpoints
+.ipynb_checkpoints/*

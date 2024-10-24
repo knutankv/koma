@@ -12,11 +12,405 @@ import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
 from matplotlib.backend_bases import MouseButton
 from matplotlib import cm
+import warnings
+from .modal import mpc
+
+from matplotlib.offsetbox import AnnotationBbox, TextArea
+
+class StabPlotter:
+    '''
+    Class to initialize interactive stabilization plot.
+    
+    Example
+    -----------
+    
+    Assuming we have a data matrix `data` sampled at `fs=128.0`. The data is first processed
+    using the covssi (can also be filtered using the `find_stable_poles` function):
+        
+        fs = 128.0
+        i = 30
+        orders_input = np.arange(2, 100, 2)
+        lambd, phi, orders = koma.oma.covssi(data, fs, i, orders_input)
+
+    
+    The stabilization plot is generated like this:
+        
+        stab_plotter = koma.plot.StabPlotter(lambd, orders, phi=phi, freq_unit='hz', damped_freq=False, annotate_hover=True)
+        fig = stab_plotter.get_fig()
+    
+    The following code extracts the data from the plotter object as variables:
+    
+        phi_sel, fn_sel, xi_sel = stab_plotter.phi, stab_plotter.fn, stab_plotter.xi
+        '
+    '''
+    
+    def __init__(self, lambd, orders, phi=None, freq_unit='rad/s', 
+                damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', 
+                pole_settings=None, selected_pole_settings=None, hover_pole_settings=None, ax=None, num=None, 
+                sort_by='undamped', annotate_hover=False):
+           
+        '''
+        Parameters
+        ------------
+  
+        lambd : double
+            array with complex-valued eigenvalues
+        orders : int
+            corresponding order for each pole in `lambd`
+        phi : double, optional
+            matrix where each column is complex-valued eigenvector corresponding to lambd
+        freq_unit : str, default='rad/s'
+            what frequency unit to use; 'Hz' or 'rad/s'
+        damped_freq : False, optional
+            whether or not to use damped frequency (or period) values in plot (False enforces undamped freqs)
+        psd_freq : double, optional
+            [not yet implemented] frequency values of plot to overlay, typically spectrum of data
+        psd_y : double, optional
+            [not yet implemented] function values of plot to overlay, typically spectrum of data
+        psd_plot_scale: {'log', 'linear'}, optional
+            [not yet implemented] how to plot the overlaid PSD (linear or logarithmic y-scale)
+        pole_settings : dict
+            dictionary with settings to pass to the plot settings of the poles
+        selected_pole_settings : dict
+            dictionary with settings to pass to the plot settings of the selected poles
+        hover_pole_settings : dict
+            dictionary with settings to pass to the plot settings of the pole currently
+            being hovered
+        ax : `matplotlib.Axis` object
+            axis to place plot in; if not given, a new axis in the figure specified
+            will be created
+        num : int, optional
+            figure number used; only used if `ax` = None
+        sort_by : str, default='undamped'
+            what quantity to sort output by; either 'undamped', 'damped' or None
+
+        Returns
+        ---------------------------
+        fig : obj
+            plotly figure object
+        
+        '''
+        if pole_settings is None: pole_settings = {}
+        if selected_pole_settings is None: selected_pole_settings = {}
+        if hover_pole_settings is None: hover_pole_settings = {}
+    
+        self._lambd = lambd
+        self._orders = orders
+        self._phi = phi
+        self.sort_by = sort_by
+
+        self.damped_freq = damped_freq
+        
+        # Make list
+        if psd_y is not None and not isinstance(psd_y, list):
+            psd_y = [psd_y]
+            psd_freq = [psd_freq]
+            
+        self.psd_freq = psd_freq
+        self.psd_y = psd_y
+        
+        self.pole_settings = dict(linestyle='none', marker='.', color='k') | pole_settings
+        self.selected_pole_settings = dict(linestyle='none', marker='o', color='r') | selected_pole_settings
+        self.hover_pole_settings = dict(linestyle='none', marker='o', color='r', alpha=0.3) | hover_pole_settings
+        self.annotate_hover = annotate_hover
+
+        self._picked = []
+        self._hoverpos = [np.nan, np.nan]
+        self._hoverix = None
+        
+        self._hoverdot = None
+        self._annotation = None
+        
+        self.picked_dots = []
+
+        if damped_freq:
+            dampedornot = 'd'
+            self._f = np.abs(np.imag(lambd))
+        else:
+            dampedornot = 'n'
+            self._f = np.abs(lambd)
+
+        if freq_unit.lower() == 'hz':
+            self._f = self._f/2/np.pi
+            self.freq_name = fr'$f_{dampedornot}$'
+            self.freq_unit = 'Hz'
+        else:
+            self.freq_name = fr'$\omega_{dampedornot}$'
+            self.freq_unit = 'rad/s'
+
+        if ax is None:
+            plt.figure(num).clf()
+            self.fig, self.ax = plt.subplots(num=num, figsize=(18,7))
+        else:
+            plt.sca(ax)
+            self.ax = ax
+            self.fig = plt.gcf()
+ 
+    @property
+    def hoverpos(self):
+        return self._hoverpos
+    
+    @hoverpos.setter
+    def hoverpos(self, ix):
+        self._hoverix = ix
+        
+        if self._hoverix is None:
+            x = np.nan
+            y = np.nan
+            text = ''
+            self._annotation.set_visible(False)
+        else:
+            x = self._f[ix]
+            y = self._orders[ix]
+            text = (f'ix = {self._hoverix}\n' +
+                    f'n = {self._orders[ix]}\n' + 
+                    fr'{self.freq_name} = {self._hoverpos[0]:.2f} {self.freq_unit}' + '\n' +
+                    fr'$\xi$ = {self.get_xi(ix)*100:.2f}%')
+            
+            if self._phi is not None:
+                this_mpc = mpc(self._phi[:,ix:ix+1])[0]
+                text = text + f'\nMPC={this_mpc*100:.1f}%'
+            
+        self._hoverpos = x,y
+        self._hoverdot.set_xdata([x])
+        self._hoverdot.set_ydata([y])
+        
+        if self.annotate_hover:
+            self._annotation.offsetbox.set(text=text)
+            self._annotation.xy = self._hoverpos
+    
+    @property
+    def picked(self):   #sorted picked
+        if self.sort_by is None:
+            ix = None
+        elif self.sort_by == 'undamped':
+            ix = np.argsort(np.abs(self._lambd[self._picked]))
+        elif self.sort_by == 'damped':
+            ix = np.argsort(np.abs(np.imag(self._lambd[self._picked])))
+
+        return np.array(self._picked)[ix]
+    
+    # Eigenvalues and eigenvectors
+    @property
+    def lambd(self):
+        if len(self.picked)>0:
+            return self._lambd[self.picked]
+        else:
+            return np.empty([0])
+
+    @property
+    def phi(self):
+        if len(self.picked)>0:
+            return self._phi[:, self.picked]
+        else:
+            return np.empty([0])
+    
+    # Damped natural freqs
+    @property
+    def wd(self):
+        return np.abs(np.imag(self.lambd))
+    
+    @property
+    def omegad(self):
+        return self.wd
+    
+    @property
+    def fd(self):
+        return self.wd/2/np.pi
+
+    # Undamped natural freqs
+    @property
+    def wn(self):
+        return np.abs(self.lambd)
+    
+    @property
+    def omegan(self):
+        return self.wn
+    
+    @property
+    def fn(self):
+        return self.wn/2/np.pi
+    
+    # Damping
+    @property
+    def xi(self):
+        return -np.real(self.lambd)/np.abs(self.lambd)
+    
+    def get_xi(self, ix=None):
+        xi = -np.real(self._lambd[ix])/np.abs(self._lambd[ix])
+        return xi
+
+    
+    def get_ix(self, event):
+        dist = (event.xdata - self._f)**2 + (event.ydata-self._orders)**2
+        ix_sel = np.argmin(dist)
+        return ix_sel
+    
+
+    def get_fig(self, show=True, block=True):
+
+        self.ax.plot(self._f, self._orders, **self.pole_settings)
+        self.ax.set_xlabel(f'{self.freq_name} [{self.freq_unit}]')
+        self.ax.set_ylabel('Order, $n$')
+        self._hoverdot = self.ax.plot([np.nan], [np.nan], **self.hover_pole_settings)[0]
+        
+        if self.annotate_hover:
+            offsetbox = TextArea('')
+            self._annotation = AnnotationBbox(offsetbox, [np.nan, np.nan],
+                    xybox=(80, 0),
+                    xycoords='data',
+                    boxcoords="offset points", 
+                    arrowprops=dict(arrowstyle="->"),
+                    pad=0.3, bboxprops=dict(alpha=0.85))
+            
+            self.ax.add_artist(self._annotation)
+
+
+        self.fig.canvas.mpl_connect('button_press_event', self.on_click)   
+        self.fig.canvas.mpl_connect('motion_notify_event', self.on_move)
+        self.fig.canvas.mpl_connect('key_press_event', self.on_keyboard)
+        self.fig.canvas.mpl_connect('close_event', self.on_close)
+        
+        if block:
+            self.title_format = '(Press enter when selection is done)'
+
+        self.update()   
+
+        if show:
+            plt.show()
+            if block:
+                self.fig.canvas.start_event_loop()
+
+        return self.fig
+    
+    # Interaction methods
+    def on_click(self, event):
+        if event.inaxes:
+            ix_sel = self.get_ix(event)
+           
+            if (event.button is MouseButton.LEFT and self.fig.canvas.manager.toolbar.mode.value == ''):
+                self._picked.append(ix_sel)
+                self.picked_dots.append(
+                    self.ax.plot(self._f[ix_sel], self._orders[ix_sel], 
+                                 **self.selected_pole_settings)[0]
+                                       )
+
+            elif event.button is MouseButton.RIGHT:
+                if ix_sel in self._picked:
+                    ix_remove = self._picked.index(ix_sel)
+
+                    self._picked.pop(ix_remove)
+                    self.picked_dots[ix_remove].remove()
+                    self.picked_dots.pop(ix_remove)
+
+        self.fig.canvas.draw()
+
+    def on_close(self, event):
+        self.fig.canvas.stop_event_loop()
+
+    def on_keyboard(self, event):
+        if event.key == 'enter':
+           
+            # Prepare for printing
+            self.hoverpos = None      
+            
+            self.update()
+            self.fig.canvas.stop_event_loop()
+                
+        
+
+    def on_move(self, event):
+        if event.inaxes:
+            ix_hover = self.get_ix(event)
+            self.hoverpos = ix_hover
+            self.fig.canvas.draw()
+
+    def update(self):
+        self.fig.canvas.draw()
+
 
 class FDDPlotter:
-    def __init__(self, U, D, f=None, lines=None, colors=None, ax=None, 
+    '''
+    Class to initiate interactive peak picking plot for FDD (or directly on CPSD).    
+    
+    Example
+    ----------
+    Assuming we have a data matrix `data` sampled at `fs=128.0`.
+    
+    First, we import the necessary functions and classes:
+            
+        from koma.signal import xwelch
+        from koma.oma import freq_svd
+        from koma.plot import FDDPlotter
+        
+    Then, we need to create a CPSD matrix:
+        
+        f, cpsd = xwelch(data, fs=fs, nfft=2048, nperseg=1024)
+        
+    This is thereafter decomposed and used as input to create the FDDPlotter object:
+        
+        U, D = koma.oma.freq_svd(cpsd)
+        fdd_plotter = koma.plot.FDDPlotter(D, U=U, f=f, lines=[0, 1], num=1)
+        
+    Finally, we get the figure:
+        
+        fig = fdd_plotter.get_fig()
+    
+    '''
+    def __init__(self, D, U=None, f=None, lines=None, colors=None, ax=None, 
                  num=None, active_settings={}, deactive_settings={}, picked_settings={},
-                 vline_settings= {}):
+                 vline_settings= {}, normalize=False, logaritmic=False, label_str='Singular line'):
+            
+        '''
+        Parameters
+        -------------
+        D : float
+            numpy array of dimensions N_dofs x N_dofs x N_freq; can either be diagonal
+            (3d) array from FDD (i.e., SVD) or the CPSD matrix (frequencies along last
+            axis) 
+        U : float, optional
+            if FDD is used as a prior step, this is the U matrix defining the orthogonal
+            vectors for varying frequencies
+        f : float, optional
+            frequency axis corresponding to D (and U); if not given indices are used
+        lines : int, optional
+            list of integers corresponding to the indices of D; these define which
+            diagonal terms to plot; if not defined, all components/lines are plotted
+        colors : list, optional
+            list of strings or rgb tuples to use for the different line plots;
+            if not given, default color order is applied
+        ax : `matplotlib.Axis` object
+            axis to place plot in; if not given, a new axis in the figure specified
+            will be created
+        num : int, optional
+            figure number used; only used if `ax` = None
+        active_settings : dict
+            dictionary with settings to use for lines that are active
+        deactive_settings : dict
+            dictionary with settings to use for lines that are inactive
+        picked_settings : dict
+            dictionary with settings to use for picked dot
+        vline_settings : dict
+            dictionary with settings to use for vertical line
+        normalize : bool, default=False
+            whether or not to normalize each line to its max value
+        logaritmic : bool, default=False
+            whether or not to use logaritmic y-axis            
+        label_str : str, default='Singular line'
+            label used in legend
+            
+        Returns
+        ----------
+        fdd_plotter : `FDDPlotter` object
+        
+        '''
+        
+        self.logaritmic = logaritmic
+        self.normalize = normalize
+        
+        if U is None:
+            U = np.stack([np.eye(D.shape[0])]*D.shape[2],axis=2)
+            
         self._U = U
         self._D = D
         self.line_ixs = np.array(lines)
@@ -29,6 +423,7 @@ class FDDPlotter:
         self.picked_dots = []
         self.vline_settings = dict(ls='-', lw=0.5) | vline_settings
         self.title_format = 'ix = {index}'
+        self.label_str = label_str
 
         if f is None:
             self.f = np.arange(self.D.shape[2])
@@ -48,22 +443,34 @@ class FDDPlotter:
         else:
             self.colors = colors
 
-    @property
-    def picked(self):
-        if len(self._picked) == 0:
-            return self._picked
-        else:
-            _picked = np.array(self._picked)
-            sort_ix = np.argsort(_picked[:,1])
-            return _picked[sort_ix, :]
-    
-    @property
-    def current_line(self):
-        return self.lines[self.index]
 
     def get_fig(self, show=True, block=True):
+        '''
+        Get an interactive figure.
+        
+        Parameters
+        -----------
+        show : bool, default=True
+            whether or not to automatically show figure
+        block : bool, default=True
+            whether or not to block before returning to retain interactivity
+            
+        Returns
+        -----------
+        fig : `matplotlib.Figure` object
+            figure object
+        '''
+        
         for l in range(self.n_lines):
-            self.lines[l], = self.ax.plot(self.f, self.D[l, l, :]/np.max(self.D[l, l, :]), color=self.colors[l], linewidth=1.0, label=f'Singular line {self.line_ixs[l]}')
+            if self.normalize:
+                plotted = [self.D[l, l, :]/np.max(self.D[l, l, :]) for l in range(self.D.shape[0])]
+            else:
+                plotted = [self.D[l, l, :] for l in range(self.D.shape[0])]
+
+            if self.logaritmic:
+                plotted = [np.log(plotted_l) for plotted_l in plotted]
+
+            self.lines[l], = self.ax.plot(self.f, plotted[l], color=self.colors[l], linewidth=1.0, label=f'{self.label_str} {self.line_ixs[l]}')
         
         self.ax.legend(frameon=False)
         self.vline = self.ax.axvline(np.nan, **self.vline_settings)
@@ -77,7 +484,7 @@ class FDDPlotter:
         
         if block:
             self.title_format = 'ix = {index} (Press enter when selection is done)'
-            
+
         self.update()   
 
         if show:
@@ -86,6 +493,22 @@ class FDDPlotter:
                 self.fig.canvas.start_event_loop()
 
         return self.fig
+    
+    
+    @property
+    def picked(self):
+        if len(self._picked) == 0:
+            return self._picked
+        else:
+            _picked = np.array(self._picked)
+            sort_ix = np.argsort(_picked[:,1])
+            return _picked[sort_ix, :]
+    
+    @property
+    def current_line(self):
+        return self.lines[self.index]
+
+
 
     def on_click(self, event):
         if event.inaxes and event.button is MouseButton.LEFT and self.fig.canvas.manager.toolbar.mode.value == '':
@@ -95,7 +518,7 @@ class FDDPlotter:
 
             self._picked.append([self.index, ix_sel])
             self.picked_dots.append(self.ax.plot(self.f[ix_sel], current_line.get_ydata()[ix_sel], marker='o',
-                            markersize=7, markerfacecolor=color, markeredgecolor='red')[0])
+                            markersize=7, markerfacecolor=color, markeredgecolor='black')[0])
 
         elif event.inaxes and event.button is MouseButton.RIGHT:
             ix_sel = np.argmin(np.abs(event.xdata - self.f))
@@ -119,11 +542,17 @@ class FDDPlotter:
             self.title_format = 'ix = {index}'
             self.update()
             self.fig.canvas.stop_event_loop()
+            
+            # Prepare for printing
+            self.vline.set_xdata([np.nan])
+            for ix,line in enumerate(self.lines):
+                line.set(**self.deactive_settings) 
+                line.set(alpha=1.0)
 
     def on_move(self, event):
         if event.inaxes:
             ix_sel = np.argmin(np.abs(event.xdata-self.f))
-            self.vline.set_xdata(self.f[ix_sel])
+            self.vline.set_xdata([self.f[ix_sel]])
             self.fig.canvas.draw()
 
     def on_scroll(self, event):
@@ -167,10 +596,11 @@ class FDDPlotter:
             return phi
 
 
-def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_unit='rad/s', damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', 
+
+def stabplot(lambd, orders, phi=None, freq_range=None, frequency_unit='rad/s', damped_freq=False, psd_freq=None, psd_y=None, psd_plot_scale='log', 
     renderer=None, pole_settings=None, selected_pole_settings=None, to_clipboard='none', return_ix=False):
     """
-    Generate plotly-based stabilization plot from output from find_stable_poles. This is still beta!
+    (DEPRECATED) Generate plotly-based stabilization plot from output from find_stable_poles.
 
     Arguments
     ---------------------------
@@ -180,8 +610,6 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
         corresponding order for each pole in `lambd`
     phi : optional, double
         matrix where each column is complex-valued eigenvector corresponding to lambd
-    model : optional, double
-        model object which is required input for plotting phi (based on geometry definition of system, constructed by `Model` class)
     freq_range : double, optional
         list of min and max values used for frequency axis
     frequency_unit : {'rad/s', 'Hz', 's'}, optional
@@ -221,6 +649,7 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
          * Index of pole (corresponding to inputs lambda_stab and order_stab)
     """
 
+    warnings.warn("deprecated", DeprecationWarning)
 
     # Treat input settings
     if pole_settings is None: pole_settings = {}
@@ -247,18 +676,18 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
     # Create frequency/period axis and corresponding labels
     if frequency_unit == 'rad/s':
         x = omega
-        xlabel = f'$\omega_{dampedornot} \; [{frequency_unit}]$'
-        tooltip_name = f'\omega_{dampedornot}'
+        xlabel = fr'$\omega_{dampedornot} [{frequency_unit}]$'
+        tooltip_name = fr'\omega_{dampedornot}'
         frequency_unit = 'rad/s'
     elif frequency_unit.lower() == 'hz':
         x = omega/(2*np.pi)
-        xlabel = f'$f_{dampedornot} \; [{frequency_unit}]$'
-        tooltip_name = f'f_{dampedornot}'
+        xlabel = fr'$f_{dampedornot} [{frequency_unit}]$'
+        tooltip_name = fr'f_{dampedornot}'
         frequency_unit = 'Hz'
     elif (frequency_unit.lower() == 's') or (frequency_unit.lower() == 'period'):
         x = (2*np.pi)/omega
-        xlabel = f'Period, $T_{dampedornot} \; [{frequency_unit}]$'
-        tooltip_name = f'T_{dampedornot}'
+        xlabel = fr'Period, $T_{dampedornot} [{frequency_unit}]$'
+        tooltip_name = fr'T_{dampedornot}'
         frequency_unit = 's'
     
     # Damping ratio and index to hover
@@ -314,7 +743,7 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
                           align='left'),
                  cells=
                      dict(values=[],fill_color='lavender',
-               align='left')), row=2, col=1)
+               align='left', format=["",".4",".4"])), row=2, col=1)
     
     fig.update_layout(
           height=1000,
@@ -332,7 +761,7 @@ def stabplot(lambd, orders, phi=None, model=None, freq_range=None, frequency_uni
                                 'freq': x[select_status], 
                                 'xi':100*xi[select_status]})
         
-        df = df.sort('freq')
+        df = df.sort_values(by=['freq'])
         
         if len(fig.data)==2:
             sel_ix = 1
