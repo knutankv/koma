@@ -439,7 +439,6 @@ class StabPlotter:
     
 
     def get_fig(self, show=True, block=True):
-<<<<<<< Updated upstream
         if self.psd_y is not None:
             ax2 = self.ax.twinx()
             for ix, (psd, fi) in enumerate(zip(self.psd_y, self.psd_freq)):
@@ -448,8 +447,6 @@ class StabPlotter:
             if self.log_psd_scale:
                 ax2.set_yscale('log')
 
-=======
->>>>>>> Stashed changes
         self.ax.plot(self._f, self._orders, **self.pole_settings)
         self.ax.set_xlabel(f'{self.freq_name} [{self.freq_unit}]')
         self.ax.set_ylabel('Order, $n$')
