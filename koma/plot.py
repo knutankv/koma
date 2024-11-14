@@ -17,6 +17,162 @@ from .modal import mpc
 
 from matplotlib.offsetbox import AnnotationBbox, TextArea
 
+class Selector:
+    def __init__(self, ax, active_settings={}, deactive_settings={}, templine_settings={}, picked_settings={}):
+        self.ax = ax
+        self.fig = ax.get_figure()
+        self.lines = list(ax.lines)
+        self.picked = []
+        self.picked_lines = []
+        self.index = 0
+        self.templine_settings = dict(ls='-', lw=0.5) | templine_settings
+
+        if len(self.lines)>0:
+            self.x = self.lines[0].get_xdata()
+
+        self.active_settings = {'linewidth': 2.0, 'alpha':1.0} | active_settings
+        self.deactive_settings = {'linewidth': 1.0, 'alpha': 0.5}  | deactive_settings
+        self.picked_settings = dict(ls='--', lw=1) | picked_settings
+
+    @property
+    def n_lines(self):
+        return len(self.lines)
+    
+    @property
+    def current_line(self):
+        return self.lines[self.index]
+    
+    def on_click(self, event):
+            if event.inaxes and event.button is MouseButton.LEFT and self.fig.canvas.manager.toolbar.mode.value == '':
+                color = self.current_line.get_color()
+                ix_sel = np.argmin(np.abs(event.xdata - self.x))
+
+                self.picked.append([self.index, ix_sel, self.x[ix_sel]])
+                self.picked_lines.append(self.ax.axvline(self.x[ix_sel], color=color, **self.picked_settings))
+
+            elif event.inaxes and event.button is MouseButton.RIGHT:
+                ix_sel = np.argmin(np.abs(event.xdata - self.x))
+                picked_mat = np.vstack(self.picked)
+                valid_x_ix = np.where((picked_mat[:,0] == self.index))[0]
+
+                if len(valid_x_ix)>0:
+                    row_ix = np.argmin(np.abs(ix_sel-picked_mat[valid_x_ix, 1]))
+                    ix_remove = valid_x_ix[row_ix]
+
+                    self.picked.pop(ix_remove)
+                    self.picked_lines[ix_remove].remove()
+                    self.picked_lines.pop(ix_remove)
+
+            self.fig.canvas.draw()
+
+    def on_scroll(self, event):
+        increment = 1 if event.button == 'up' else -1
+        self.index = np.clip(self.index + increment, 0, self.n_lines-1)
+        self.x = self.lines[self.index].get_xdata()
+        self.templine.set_color(self.current_line.get_color())
+        self.update()
+    
+    def update(self):
+        for ix,line in enumerate(self.lines):
+            if ix==self.index:
+                line.set(**self.active_settings)
+            else:
+                line.set(**self.deactive_settings) 
+
+        self.fig.canvas.draw()
+
+    def on_close(self, event):
+        self.fig.canvas.stop_event_loop()
+
+    def on_keyboard(self, event):
+        if event.key == 'enter':
+            self.title_format = 'ix = {index}'
+            self.update()
+            self.fig.canvas.stop_event_loop()
+            
+            # Prepare for printing
+            self.templine.set_xdata([np.nan])
+            for ix,line in enumerate(self.lines):
+                line.set(**self.deactive_settings) 
+                line.set(alpha=1.0)
+
+    def on_move(self, event):
+        if event.inaxes:
+            ix_sel = np.argmin(np.abs(event.xdata-self.x))
+            self.templine.set_xdata([self.x[ix_sel]])
+            self.fig.canvas.draw()
+
+    def get_fig(self, show=True, block=True):
+        '''
+        Get an interactive figure.
+        
+        Parameters
+        -----------
+        show : bool, default=True
+            whether or not to automatically show figure
+        block : bool, default=True
+            whether or not to block before returning to retain interactivity
+            
+        Returns
+        -----------
+        fig : `matplotlib.Figure` object
+            figure object
+        '''
+        
+        self.ax.legend(frameon=False)
+        self.templine = self.ax.axvline(np.nan, **self.templine_settings)
+        self.templine.set_color(self.current_line.get_color())
+
+        self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
+        self.fig.canvas.mpl_connect('button_press_event', self.on_click)   
+        self.fig.canvas.mpl_connect('motion_notify_event', self.on_move)
+        self.fig.canvas.mpl_connect('key_press_event', self.on_keyboard)
+        self.fig.canvas.mpl_connect('close_event', self.on_close)
+        
+        if block:
+            self.title_format = 'ix = {index} (Press enter when selection is done)'
+
+        self.update()   
+
+        if show:
+            plt.show()
+            if block:
+                self.fig.canvas.start_event_loop()
+
+        return self.fig
+    
+    @property
+    def all_picked_x(self):
+        return np.array([p[2] for p in self.picked])
+    
+    @property
+    def picked_x(self):
+        pmat = np.vstack(self.picked)
+        x = [None]*self.n_lines
+        for ix in range(self.n_lines):
+            okix = pmat[:,0] == ix
+            x[ix] = pmat[okix, 2]
+
+        return x
+    
+    @property
+    def picked_ix(self):
+        pmat = np.vstack(self.picked)
+        x_ix = [None]*self.n_lines
+        for ix in range(self.n_lines):
+            okix = pmat[:,0] == ix
+            x_ix[ix] = pmat[okix, 1].astype(int)
+
+        return x_ix
+    
+    @property
+    def picked_line_ix(self):
+        return np.array([p[0] for p in self.picked])
+    
+    @property
+    def all_picked_ix(self):
+        return np.array([p[1] for p in self.picked])
+
 class StabPlotter:
     '''
     Class to initialize interactive stabilization plot.
@@ -283,6 +439,7 @@ class StabPlotter:
     
 
     def get_fig(self, show=True, block=True):
+<<<<<<< Updated upstream
         if self.psd_y is not None:
             ax2 = self.ax.twinx()
             for ix, (psd, fi) in enumerate(zip(self.psd_y, self.psd_freq)):
@@ -291,6 +448,8 @@ class StabPlotter:
             if self.log_psd_scale:
                 ax2.set_yscale('log')
 
+=======
+>>>>>>> Stashed changes
         self.ax.plot(self._f, self._orders, **self.pole_settings)
         self.ax.set_xlabel(f'{self.freq_name} [{self.freq_unit}]')
         self.ax.set_ylabel('Order, $n$')
@@ -399,6 +558,10 @@ class FDDPlotter:
     Finally, we get the figure:
         
         fig = fdd_plotter.get_fig()
+        
+    Scroll with the mouse to change the active line, click right mouse button to
+    remove point and left mouse button to add point.
+    
     
     '''
     def __init__(self, D, U=None, f=None, lines=None, colors=None, ax=None, 
@@ -512,7 +675,7 @@ class FDDPlotter:
                 plotted = [self.D[l, l, :] for l in range(self.D.shape[0])]
 
             if self.logaritmic:
-                plotted = [np.log(plotted_l) for plotted_l in plotted]
+                plotted = [np.log10(plotted_l) for plotted_l in plotted]
 
             self.lines[l], = self.ax.plot(self.f, plotted[l], color=self.colors[l], linewidth=1.0, label=f'{self.label_str} {self.line_ixs[l]}')
         
