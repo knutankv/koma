@@ -462,8 +462,10 @@ class StabPlotter:
                     pad=0.3, bboxprops=dict(alpha=0.85))
             
             self.ax.add_artist(self._annotation)
+            
+        if self.psd_y is not None:
+            self.ax.set_zorder(ax2.get_zorder() + 1)
 
-        self.ax.set_zorder(ax2.get_zorder() + 1)
         self.ax.patch.set_visible(False)
 
         self.fig.canvas.mpl_connect('button_press_event', self.on_click)   
