@@ -472,11 +472,15 @@ class Model:
         return self.filter_elements(allowed_types=['rectangle', 'triangle'])
         
     def get_line_elements(self):
-            return self.filter_elements(allowed_types=['line'])
+        return self.filter_elements(allowed_types=['line'])
         
     @property
     def n_faces(self):
         return len(self.get_elements(filter_elements=['rectangle', 'triangle']))
+    
+    @property
+    def el_types(self):
+        return set([el.el_type for el in self.elements])
 
     def plot(self, pl=None, show=True, plot_lines=True, plot_nodes=True, 
                 plot_sensor_nodes=True, 
@@ -498,7 +502,8 @@ class Model:
         show : True, optional
             whether or not to show plot at end - output is pl-object, which can be shown later
         plot_lines : True, optional
-            whether or not to plot the line elements
+            whether or not to plot the line elements;
+            only applicable if line elements are present
         plot_nodes : True, optional
             whether or not to plot the nodes
         node_labels : True, optional
@@ -508,7 +513,8 @@ class Model:
             whether or not to show element labels
             if input is a list of element labels, only these are shown
         plot_faces : True, optional
-            whether or not to plot face elements (triangles and rectangles)
+            whether or not to plot face elements (triangles and rectangles);
+            only applicable if face elements are present
         canvas_settings : dict, optional
             dictionary with additional settings for canvas
         node_settings : dict, optional
@@ -568,6 +574,11 @@ class Model:
             node_label_fun = lambda n: str(int(n.label))
         if element_label_fun is None:
             element_label_fun = lambda e: str(int(e.label))
+
+        # Check what type of elements are present
+        el_types = self.el_types
+        plot_faces = plot_faces & (('triangle' in el_types) or ('rectangle' in el_types))
+        plot_lines = plot_lines & ('line' in el_types)
 
         # Element label settings
         elementlabel_settings = dict(always_visible=True, 

@@ -9,4 +9,4 @@ build
 .ipynb_checkpoints
 pykoma.egg-info
 _dev
-.ipynb_checkpoints/*
+*.ipynb_checkpoint
