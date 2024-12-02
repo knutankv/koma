@@ -612,8 +612,8 @@ class Model:
 
         if plot_nodes is True:
             nodes_to_plot = self.nodes*1
-        elif plot_nodes is False and sensor_node_settings != node_settings and hasattr(self, 'sensors'):
-            nodes_to_plot = self.get_nodes(np.array(self.sensors.values()))
+        elif plot_nodes is False and sensor_node_settings != node_settings and hasattr(self, 'sensors') and len(self.sensors)>0:
+            nodes_to_plot = self.get_nodes(list(self.sensors.values()))
         elif plot_nodes is False:
             nodes_to_plot = []
         else:
@@ -777,7 +777,6 @@ class Model:
             if hasattr(self, 'point_mesh'):
                 self.point_mesh.points = pts
 
-            
             if hasattr(self, 'sensor_point_mesh'):
                 pts_sensors = pv.pyvista_ndarray(self.get_points(nodes=self.sensors.values(), 
                                                                  deformed=True, flattened=False))
@@ -801,7 +800,10 @@ class Model:
             else:
                 pl.open_movie(filename)
 
-            pl = self.plot(pl=pl, show=False, deformed=True, **kwargs)
+            pl = self.plot(pl=pl, show=False, deformed=True, line_settings=line_settings, 
+                                node_settings=node_settings,
+                                face_settings=face_settings, **kwargs)
+            
             pl.show(interactive_update=True)
             frames = cycles*frames_per_cycle
             
@@ -822,7 +824,9 @@ class Model:
                     pl = pvqt.BackgroundPlotter()
                     pl.background_color='white'
 
-            pl = self.plot(pl=pl, deformed=True, **kwargs)
+            pl = self.plot(pl=pl, deformed=True, line_settings=line_settings, 
+                                node_settings=node_settings,
+                                face_settings=face_settings, **kwargs)
             self.dt = 1/fps
             self.dangle = self.dt * f * np.pi * 2.0
             pl.add_callback(update_shape, interval=int(np.ceil(self.dt*1000)))  
