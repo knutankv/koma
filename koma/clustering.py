@@ -86,9 +86,13 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
     ---------------------------
     Kvåle and Øiseth :cite:`Kvale2020`
     """
-
+    
+    # Establish dictionary with available difference variables
+    diff_vars = dict()
+    
     if type(boolean_stops)==str and boolean_stops == 'avoid_same_order':
         boolean_stops = {'order': [1, np.inf]}
+        diff_vars['order'] = np.abs(crossdiff(order, relative=False))   #generates != integers?
                     
     elif boolean_stops is None:
          boolean_stops = {}  
@@ -100,8 +104,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
     omega_d = np.abs(np.imag(lambd))
     xi = -np.real(lambd)/np.abs(lambd)
 
-    # Establish dictionary with available difference variables
-    diff_vars = dict()
+
     if 'mac' in scaling:
         diff_vars['mac'] = np.abs(1.0 - modal.xmacmat(phi))
     
@@ -124,7 +127,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
 
     # Normalize distances
     if normalize_distances:
-        for key in diff_vars:
+        for key in scaling:
             diff_vars[key] = diff_vars[key]/np.max(np.abs(diff_vars[key])[:])
 
     # Establish boolean hard stop differences
