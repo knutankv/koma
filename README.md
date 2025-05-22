@@ -1,5 +1,4 @@
 ![KOMA logo](https://raw.githubusercontent.com/knutankv/koma/master/koma-logo.png)
-=======================
 
 What is koma?
 =======================
