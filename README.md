@@ -1,6 +1,6 @@
 ![KOMA logo](https://raw.githubusercontent.com/knutankv/koma/master/koma-logo.svg)
 
-What is koma?
+What is KOMA?
 =======================
 KOMA is a package for operational modal analysis in Python. For additional details about the implementation of the covariance-driven stochastic subspace identification algorithm please refer to [5]. For automatic OMA and clustering analysis, please refer to [6]. More information and functionality will be added after publication of the cited paper.
 
