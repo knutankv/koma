@@ -10,7 +10,7 @@ Installation
 Either install via PyPI as follows:
 
 ```
-pip install pykoma
+pip install koma-python
 ```
 
 or install directly from github:
