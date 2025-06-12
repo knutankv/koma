@@ -808,7 +808,7 @@ def stabplot(lambd, orders, phi=None, freq_range=None, frequency_unit='rad/s', d
     """
     (DEPRECATED) Generate plotly-based stabilization plot from output from find_stable_poles.
 
-    Arguments
+    Parameters
     ---------------------------
     lambd : double
         array with complex-valued eigenvalues

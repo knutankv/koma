@@ -8,7 +8,7 @@ def xwelch(x, **kwargs):
     '''
     Compute Welch cross-spectral density matrix for given inputs (stacked column-wise).
 
-    Arguments
+    Parameters
     -----------
     x : float
         data matrix (column-wise data)
@@ -38,7 +38,7 @@ def estimate_lags(data, ref=0, upsample=None, fs=1.0, upsample_method='fourier')
     Compute lags between all channels of data (channels stacked column-wise),
     based on max of correlation.
 
-    Arguments
+    Parameters
     -----------
     data : float
         data matrix (column-wise data)
@@ -91,7 +91,7 @@ def shift_data(data, lags, cut=True):
     '''
     Shift data by specified lags.
 
-    Arguments
+    Parameters
     -----------
     data : float
         data matrix (column-wise data)

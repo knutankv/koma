@@ -15,7 +15,7 @@ def crossdiff(arr, relative=False, allow_negatives=False):
     """
     Establish cross difference matrix used for clustering analysis.
 
-    Arguments
+    Parameters
     ---------------------------
     arr : double
         array to provide cross difference of (n_points long)
@@ -58,7 +58,7 @@ def establish_tot_diff(lambd, phi, order, boolean_stops='default', scaling=None,
     """
     Establish total difference matrix based on input modes (from find_stable_modes).
         
-    Arguments
+    Parameters
     ---------------------------
     lambd : double
         array with complex-valued eigenvalues deemed stable
@@ -156,7 +156,7 @@ class PoleClusterer:
     """
     Object to create pole clusters.
     
-    Arguments
+    Parameters
     ---------------------------
     lambd : double
         array with complex-valued eigenvalues deemed stable
@@ -227,7 +227,7 @@ class PoleClusterer:
         """
         Postprocess cluster object (sort and restrict).
 
-        Arguments
+        Parameters
         ---------------------------
         prob_threshold : 0.0, optional
             threshold value for probability of point belonging 
@@ -319,7 +319,7 @@ def group_clusters(lambd_used, phi_used, order_stab_used, group_ixs, all_single_
     '''
     Group the output of PoleClusterer.postprocess()
 
-    Arguments
+    Parameters
     ---------------------------
     lambd_used : double
         sorted/remaining eigenvalues after restrictions/sort
@@ -385,7 +385,7 @@ def group_array(arr, group_ixs, axis=0):
     '''
     Group a single output array of PoleClusterer.postprocess() based on group indices.
 
-    Arguments
+    Parameters
     ---------------------------
     arr : double
         array corresponding

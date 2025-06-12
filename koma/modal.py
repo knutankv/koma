@@ -12,7 +12,7 @@ def xmacmat(phi1, phi2=None, conjugates=True):
     """
     Modal assurance criterion numbers, cross-matrix between two modal transformation matrices (modes stacked as columns).
 
-    Arguments
+    Parameters
     ---------------------------
     phi1 : double
         reference modes
@@ -57,7 +57,7 @@ def xmacmat_alt(phi1, phi2=None, conjugates=True):
     """
     Alternative implementation. Modal assurance criterion numbers, cross-matrix between two modal transformation matrices (modes stacked as columns).
 
-    Arguments
+    Parameters
     ---------------------------
     phi1 : double
         reference modes
@@ -99,7 +99,7 @@ def mac(phi1, phi2):
     """
     Modal assurance criterion number from comparison of two mode shapes.
 
-    Arguments
+    Parameters
     ---------------------------
     phi1 : double
         first mode
@@ -120,7 +120,7 @@ def maxreal_vector(phi):
     """
     Rotate complex vector such that the absolute values of the real parts are maximized.
 
-    Arguments
+    Parameters
     ---------------------------
     phi : double
         complex-valued mode shape vector (column-wise stacked mode shapes)
@@ -141,7 +141,7 @@ def maxreal(phi):
     """
     Rotate complex vectors (stacked column-wise) such that the absolute values of the real parts are maximized.
 
-    Arguments
+    Parameters
     ---------------------------
     phi : double
         complex-valued modal transformation matrix (column-wise stacked mode shapes)
@@ -183,7 +183,7 @@ def align_two_modes(phi1, phi2):
     """
     Determine flip sign of two complex-valued or real-valued mode shapes.
 
-    Arguments
+    Parameters
     ---------------------------
     phi1 : double
         complex-valued (or real-valued) mode shape
@@ -208,7 +208,7 @@ def align_modes(phi):
     """
     Flip complex-valued or real-valued mode shapes such that similar modes have the same sign.
 
-    Arguments
+    Parameters
     ---------------------------
     phi : double
         complex-valued (or real-valued) modal transformation matrix (column-wise stacked mode shapes)
@@ -231,7 +231,7 @@ def normalize_phi(phi, return_scaling=True):
     """
     Normalize all complex-valued (or real-valued) mode shapes in modal transformation matrix.
 
-    Arguments
+    Parameters
     ---------------------------
     phi : double
         complex-valued (or real-valued) modal transformation matrix (column-wise stacked mode shapes)
