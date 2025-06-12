@@ -1,4 +1,4 @@
-![KOMA logo](https://raw.githubusercontent.com/knutankv/koma/master/koma-logo.png)
+![KOMA logo](https://raw.githubusercontent.com/knutankv/koma/master/koma-logo.svg)
 
 What is KOMA?
 =======================
@@ -10,7 +10,7 @@ Installation
 Either install via PyPI as follows:
 
 ```
-pip install pykoma
+pip install koma-python
 ```
 
 or install directly from github:
