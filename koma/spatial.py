@@ -21,7 +21,7 @@ class Element:
     Element class for creation of elements in model. Elements can have 2, 3 or 4 nodes, which 
     dictate what type of element it representes (line, triangle, rectangle).
 
-    Arguments
+    Parameters
     ------------
     nodes : `Node`
         list of `Node` objects to connect with element
@@ -81,7 +81,7 @@ class Node:
     Node class for creation of nodes to use in model. Nodes can be defined by two or three coordinates.
     If the latter, z is assumed 0. Label is required.
 
-    Arguments
+    Parameters
     ------------
     label : int
         requested label given to node
@@ -190,7 +190,7 @@ class Model:
     '''
     Model class for creation of models for visualizing mode shapes.
 
-    Arguments
+    Parameters
     ------------
     nodes : `Node` 
         list of nodes
@@ -309,7 +309,7 @@ class Model:
         '''
         Exapend field of subsystem u to full field based on given dofmap.
 
-        Arguments
+        Parameters
         ----------
         u : float
             displacements to assign to system
@@ -495,7 +495,7 @@ class Model:
         '''
         Plot model (either undeformed or deformed).
 
-        Arguments
+        Parameters
         ----------
         pl : `pyvista.Plotter()` object, optional
             plotter object - one will be created if not input
@@ -711,7 +711,7 @@ class Model:
         '''
         Plot model (either undeformed or deformed).
 
-        Arguments
+        Parameters
         ----------
         phi : float, complex
             1d array with considered mode shape
@@ -746,7 +746,7 @@ class Model:
         ensure_exact_cycle : True, optional
             ensure that fps is such that 0 and 0+T both are exactly sampled/shown
         **kwargs
-            arguments supported by `spatial.plot` are passed to that method
+            Parameters supported by `spatial.plot` are passed to that method
         
         Example
         ---------

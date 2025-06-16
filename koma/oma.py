@@ -28,7 +28,7 @@ def is_pos_def(x):
     """
     Check if matrix is positive definite.
 
-    Arguments
+    Parameters
     ---------------------------
     x : double
         matrix to be checked
@@ -46,7 +46,7 @@ def gaxpy_chol(M):
     """
     Gaxpy Cholesky decomposition. Required for Cov-SSI.
 
-    Arguments
+    Parameters
     ---------------------------
     M : double
         matrix to be decomposed
@@ -81,7 +81,7 @@ def gaxpy_chol_alt(M):
     """
     Alternative Gaxpy Cholesky decomposition.
 
-    Arguments
+    Parameters
     ---------------------------
     M : double
         matrix to be decomposed
@@ -118,7 +118,7 @@ def xcorr_lag(data, maxlag):
     """
     Computes cross-correlation matrices for multiple time lags based on input data.
 
-    Arguments
+    Parameters
     ---------------------------
     data : double
         matrix with data, n_samples-by-n_channels (channels are column-wise)
@@ -156,7 +156,7 @@ def cva_weights(R, balancing_H0=None, balance=False):
     """
     Computes the weights for CVA.
 
-    Arguments
+    Parameters
     ---------------------------
     R : double
         n_channels-by-n_channels-by-n_lags large array, each slice in third dimension 
@@ -222,7 +222,7 @@ def stack_hankel(R):
     """
     Stacks lag-shifted cross-correlation matrices (stacked along third dimension) into Hankel matrix.
 
-    Arguments
+    Parameters
     ---------------------------
     R : double
         n_channels-by-n_channels-by-n_lags large array, each slice in third dimension 
@@ -259,7 +259,7 @@ def stack_toeplitz(R):
     """
     Stacks lag-shifted cross-correlation matrices (stacked along third dimension) into Toeplitz matrix.
 
-    Arguments
+    Parameters
     ---------------------------
     R : double
         n_channels-by-n_channels-by-n_lags large array, each slice in third dimension 
@@ -297,7 +297,7 @@ algorithm='shift', showinfo=True, balance=True, return_A=False, discard_conjugat
     """
     Main function for covariance-driven SSI.
 
-    Arguments
+    Parameters
     ---------------------------
     data : double
         data matrix, with channels stacked column-wise (n_samples-by-n_channels)
@@ -459,7 +459,7 @@ def flatten_stab_results(lambd, phi, orders):
     """
     Flats out nested lambd and phi results.
 
-    Arguments
+    Parameters
     -----------------------
     lambd : double
         list of arrays with complex-valued eigenvalues (each list entry correspond to one order)
@@ -492,7 +492,7 @@ def find_stable_poles(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'damping': 
      """
      Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.
     
-     Arguments
+     Parameters
      ---------------------------
      lambd : double
          array with complex-valued eigenvalues (one for each pole)
@@ -624,7 +624,7 @@ def find_stable_poles_legacy(lambd, phi, orders, s, stabcrit={'freq': 0.05, 'dam
     """
     Post-processing of Cov-SSI results, to establish modes (stable poles) from all poles.
 
-    Arguments
+    Parameters
     ---------------------------
     lambd : double
         list of arrays with complex-valued eigenvalues, one list entry per order
