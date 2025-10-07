@@ -5,6 +5,7 @@ import pyvista as pv
 import pyvistaqt as pvqt
 import numpy as np
 from koma.modal import maxreal_vector
+import dill
 import sys
 from scipy.interpolate import griddata
 
@@ -281,6 +282,36 @@ class Model:
         
         self.undefined_dofs = undefined_dofs
 
+    def to_file(self, path):
+        """
+        Save the model to a kma file.
+
+        Parameters
+        ----------
+        path : str
+            File path to save the model.
+        """
+        save_model(self, path)
+
+
+    @classmethod
+    def from_file(cls, path):
+        """
+        Load a model from a kma file.
+
+        Parameters
+        ----------
+        path : str
+            File path to load the model from.
+
+        Returns
+        -------
+        Model
+            The loaded model.
+        """
+        return load_model(path)
+    
+
     @property 
     def u(self):
         return self._u
@@ -330,7 +361,7 @@ class Model:
             for node in self.dofmap:
                 rels = self.dofmap[node]
                 for dof_ix, rel in enumerate(rels):
-                    if type(rel) in [int, float, np.int32]:
+                    if type(rel) in [int, float, np.int32, np.int64]:
                         global_ix = self.get_node_ixs(node)[dof_ix]
                         if rel is None:
                             ufull[global_ix] = np.nan

@@ -239,8 +239,8 @@ class StabPlotter:
             figure number used; only used if `ax` = None
         sort_by : str, default='undamped'
             what quantity to sort output by; either 'undamped', 'damped' or None
-        psd_color : str, default='gray'
-            color to use for PSD plot overlayed
+        psd_color : str or list, default='gray'
+            color(s) to use for PSD plot overlayed
 
         Returns
         ---------------------------
@@ -262,8 +262,13 @@ class StabPlotter:
         # Make list
         if psd_y is not None and not isinstance(psd_y, list):
             psd_y = [psd_y]
-            psd_freq = [psd_freq]
-        
+
+        if psd_freq is not None and not isinstance(psd_freq, list):
+            psd_freq = [psd_freq]*len(psd_y)
+
+        if psd_color is not None and not isinstance(psd_color, list):
+            psd_color = [psd_color]    
+            
         self.psd_color = psd_color
         self.psd_freq = psd_freq
         self.psd_y = psd_y
@@ -442,7 +447,7 @@ class StabPlotter:
         if self.psd_y is not None:
             ax2 = self.ax.twinx()
             for ix, (psd, fi) in enumerate(zip(self.psd_y, self.psd_freq)):
-                ax2.plot(fi, psd, self.psd_color)
+                ax2.plot(fi, psd, self.psd_color[ix])
 
             if self.log_psd_scale:
                 ax2.set_yscale('log')

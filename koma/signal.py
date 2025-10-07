@@ -4,6 +4,7 @@ from scipy.signal import correlate, correlation_lags
 from scipy.signal import resample_poly, resample
 from scipy.interpolate import interp1d
 
+
 def xwelch(x, **kwargs):
     '''
     Compute Welch cross-spectral density matrix for given inputs (stacked column-wise).
@@ -63,14 +64,14 @@ def estimate_lags(data, ref=0, upsample=None, fs=1.0, upsample_method='fourier')
     '''   
     if upsample is not None:
         if upsample_method == 'fourier':
-            data = resample_poly(data, upsample, 1.0)
+            data = resample(data, upsample)
         elif upsample_method == 'linear':
             t = np.arange(0, (data.shape[0])*1/fs, 1/fs)
             fsi = fs*upsample
             ti = np.arange(0, (data.shape[0])*upsample*1/fsi, 1/fsi)
             data = interp1d(t, data, axis=0, fill_value='extrapolate')(ti)
         elif upsample_method == 'poly':
-            data = resample(data, upsample)
+            data = resample_poly(data, upsample, 1.0)
     else:
         upsample = 1.0
     

@@ -10,6 +10,45 @@ import numpy as np
 from scipy.signal import correlate
 from scipy.linalg import matrix_balance, cholesky
 from .modal import xmacmat_alt, mpc
+from .signal import xwelch
+
+
+def running_fdd(data, fs, lines=[0,1,2], window=256, running_overlap=None, 
+                return_U=False, **kwargs):
+    
+    if running_overlap is None:
+        running_overlap = int(np.round(window/2))
+
+    n = data.shape[0]
+    U = []
+    D = []
+
+    dt = 1/fs
+    tfull = np.arange(0, (n)*dt, dt)
+    all_n0 = np.arange(0, n-window, window-running_overlap)
+    t = np.zeros(len(all_n0))
+
+    for ix,n0 in enumerate(all_n0):
+        datai = data[n0:window-running_overlap+n0, :]
+        t[ix] = (tfull[n0] + tfull[window-running_overlap+n0])/2
+        f, cpsd = xwelch(datai, fs=fs, **kwargs)
+        Ui, Di = freq_svd(cpsd)
+
+        di = np.vstack([np.diag(Di[:,:,i])[lines] for i in range(Di.shape[2])])
+        
+        if return_U:
+            U.append(Ui)
+
+        D.append(di)
+    
+    # Stack D as one numpy array per list entry (each line)
+    D = list(np.stack(D).T)
+
+    if return_U:
+        return t, f, D, U
+    else:
+        return t, f, D
+    
 
 
 def freq_svd(cpsd):
