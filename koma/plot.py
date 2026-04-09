@@ -568,9 +568,10 @@ class FDDPlotter:
     
     
     '''
-    def __init__(self, D, U=None, f=None, lines=None, colors=None, ax=None, 
+    def __init__(self, D, U=None, f=None, lines=None, colors=None, ax=None,
                  num=None, active_settings={}, deactive_settings={}, picked_settings={},
-                 vline_settings= {}, normalize=False, logaritmic=False, label_str='Singular line'):
+                 vline_settings= {}, normalize=False, logaritmic=False, label_str='Singular line',
+                 snap_to_peak=False, peak_search_radius=0.05):
             
         '''
         Parameters
@@ -606,9 +607,15 @@ class FDDPlotter:
         normalize : bool, default=False
             whether or not to normalize each line to its max value
         logaritmic : bool, default=False
-            whether or not to use logaritmic y-axis            
+            whether or not to use logaritmic y-axis
         label_str : str, default='Singular line'
             label used in legend
+        snap_to_peak : bool, default=False
+            if True, snaps selection to the nearest local maximum within
+            `peak_search_radius` of the click position
+        peak_search_radius : float, default=0.05
+            fraction of the x-axis range used as search window when
+            `snap_to_peak` is True
             
         Returns
         ----------
@@ -635,6 +642,8 @@ class FDDPlotter:
         self.vline_settings = dict(ls='-', lw=0.5) | vline_settings
         self.title_format = 'ix = {index}'
         self.label_str = label_str
+        self.snap_to_peak = snap_to_peak
+        self.peak_search_radius = peak_search_radius
 
         if f is None:
             self.f = np.arange(self.D.shape[2])
@@ -686,10 +695,15 @@ class FDDPlotter:
         self.ax.legend(frameon=False)
         self.vline = self.ax.axvline(np.nan, **self.vline_settings)
         self.vline.set_color(self.current_line.get_color())
+        self.preview_dot, = self.ax.plot(np.nan, np.nan, marker='o', markersize=8,
+                                         markerfacecolor='none', markeredgewidth=1.5,
+                                         markeredgecolor=self.current_line.get_color(),
+                                         zorder=5, animated=False)
 
         self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
-        self.fig.canvas.mpl_connect('button_press_event', self.on_click)   
+        self.fig.canvas.mpl_connect('button_press_event', self.on_click)
         self.fig.canvas.mpl_connect('motion_notify_event', self.on_move)
+        self.fig.canvas.mpl_connect('axes_leave_event', self.on_leave)
         self.fig.canvas.mpl_connect('key_press_event', self.on_keyboard)
         self.fig.canvas.mpl_connect('close_event', self.on_close)
         
@@ -721,18 +735,42 @@ class FDDPlotter:
 
 
 
+    def _closest_ix(self, event, line):
+        '''Find index of closest point on line to click, using normalized x,y distance.
+        If snap_to_peak is True, snaps to the nearest local maximum within peak_search_radius.'''
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+        x_range = xlim[1] - xlim[0] or 1.0
+        y_range = ylim[1] - ylim[0] or 1.0
+        dx = (self.f - event.xdata) / x_range
+        dy = (line.get_ydata() - event.ydata) / y_range
+
+        if self.snap_to_peak:
+            y = line.get_ydata()
+            # local maxima: higher than both neighbours
+            is_peak = np.r_[False, (y[1:-1] > y[:-2]) & (y[1:-1] > y[2:]), False]
+            # restrict to peaks within search window
+            in_window = np.abs(self.f - event.xdata) <= self.peak_search_radius * x_range
+            candidates = is_peak & in_window
+            if candidates.any():
+                cand_ix = np.where(candidates)[0]
+                best = np.argmin(dx[cand_ix]**2 + dy[cand_ix]**2)
+                return cand_ix[best]
+
+        return np.argmin(dx**2 + dy**2)
+
     def on_click(self, event):
         if event.inaxes and event.button is MouseButton.LEFT and self.fig.canvas.manager.toolbar.mode.value == '':
             current_line = self.current_line
             color = current_line.get_color()
-            ix_sel = np.argmin(np.abs(event.xdata - self.f))
+            ix_sel = self._closest_ix(event, current_line)
 
             self._picked.append([self.index, ix_sel])
             self.picked_dots.append(self.ax.plot(self.f[ix_sel], current_line.get_ydata()[ix_sel], marker='o',
                             markersize=7, markerfacecolor=color, markeredgecolor='black')[0])
 
         elif event.inaxes and event.button is MouseButton.RIGHT:
-            ix_sel = np.argmin(np.abs(event.xdata - self.f))
+            ix_sel = self._closest_ix(event, self.current_line)
             picked_mat = np.array(self._picked)
             valid_ix = np.where((picked_mat[:,0] == self.index))[0]
             if len(valid_ix)>0:
@@ -760,16 +798,26 @@ class FDDPlotter:
                 line.set(**self.deactive_settings) 
                 line.set(alpha=1.0)
 
+    def on_leave(self, _):
+        self.preview_dot.set_data([np.nan], [np.nan])
+        self.vline.set_xdata([np.nan])
+        self.fig.canvas.draw()
+
     def on_move(self, event):
         if event.inaxes:
-            ix_sel = np.argmin(np.abs(event.xdata-self.f))
-            self.vline.set_xdata([self.f[ix_sel]])
+            ix_sel = self._closest_ix(event, self.current_line)
+            fx = self.f[ix_sel]
+            fy = self.current_line.get_ydata()[ix_sel]
+            self.vline.set_xdata([fx])
+            self.preview_dot.set_data([fx], [fy])
             self.fig.canvas.draw()
 
     def on_scroll(self, event):
         increment = 1 if event.button == 'up' else -1
         self.index = np.clip(self.index + increment, 0, self.n_lines-1)
-        self.vline.set_color(self.current_line.get_color())
+        color = self.current_line.get_color()
+        self.vline.set_color(color)
+        self.preview_dot.set(markeredgecolor=color)
         self.update()
 
     def update(self):
