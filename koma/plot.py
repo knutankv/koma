@@ -135,6 +135,7 @@ class Selector:
         self.update()   
 
         if show:
+            plt.rcParams['savefig.bbox'] = None
             plt.show()
             if block:
                 self.fig.canvas.start_event_loop()

@@ -34,6 +34,22 @@ class Element:
         self.nodes = nodes
         self.label = label
 
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @nodes.setter
+    def nodes(self, value):
+        self._nodes = [n if isinstance(n, Node) else int(n) for n in value]
+
+    @property
+    def label(self):
+        return self._label
+
+    @label.setter
+    def label(self, value):
+        self._label = None if value is None else int(value)
+
     def get_cog(self, deformed=False):
         if deformed:
             return np.mean([node.xyz for node in self.nodes], axis=0)
@@ -141,8 +157,11 @@ class Node:
         elif isinstance(other, int):
             return self.label == other
 
-def rel3(master):
-    return [Rel(master, 0), Rel(master, 1), Rel(master, 2)]
+def rel3(master, dofs=[0,1,2]):
+    return [Rel(master, dof) if dof in dofs else None for dof in dofs]
+
+def rel3_scaled(master, scale, dofs=[0,1,2]):   
+    return [Rel(fun=lambda n: n(master, dof)*scale) if dof in dofs else None for dof in dofs]
 
 class Rel:
     def __init__(self, master=None, dof=None, fun=None):
@@ -447,7 +466,10 @@ class Model:
     
     def get_node_index(self, node):
         # Accepts both label and object
-        return self.nodes.index(node)
+        if node in self.nodes:
+            return self.nodes.index(node)
+        else:
+            raise ValueError(f'{node} not found in model nodes.')
     
     def get_node_ixs(self, node):
         return self.get_node_index(node)*3 + np.array([0,1,2])
